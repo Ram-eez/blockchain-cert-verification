@@ -1,16 +1,21 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 async function main() {
-  const Certificate = await ethers.getContractFactory("Certificate");
+  const Registry = await hre.ethers.getContractFactory("CertificateRegistry");
+  const registry = await Registry.deploy();
+  await registry.waitForDeployment();
 
-  const contract = await Certificate.deploy();
+  const address = await registry.getAddress();
+  console.log("CertificateRegistry deployed to:", address);
 
-  await contract.waitForDeployment();
-
-  console.log("Deployed to:", contract.target);
+  const fs = require("fs");
+  fs.writeFileSync(
+    "deployments.json",
+    JSON.stringify({ CertificateRegistry: address, network: "sepolia" }, null, 2)
+  );
 }
 
 main().catch((error) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });
