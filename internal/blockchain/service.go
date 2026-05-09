@@ -79,7 +79,25 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, certificate
 	}, nil
 }
 
-func (bcc *blockChainService) RevokeCertificate(ctx context.Context, certificateId [32]byte) error
+func (bcc *blockChainService) RevokeCertificate(ctx context.Context, certificateId [32]byte) error {
+	auth, err := bcc.getAuth()
+	if err != nil {
+		return err
+	}
+
+	tx, err := bcc.contract.RevokeCertificate(
+		auth,
+		certificateId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("tx hash:", tx.Hash().Hex())
+
+	return nil
+}
 
 func (bcc *blockChainService) getAuth() (*bind.TransactOpts, error) {
 	// convert hex private key string into ECDSA private key
