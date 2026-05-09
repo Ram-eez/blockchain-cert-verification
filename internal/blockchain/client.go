@@ -1,7 +1,8 @@
-package backend
+package blockchain
 
 import (
 	"blockchain/services/pkg/certificate"
+	"fmt"
 	"log"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -14,14 +15,13 @@ type BlockChainClient struct {
 }
 
 // connect to sepolia
-
 func Init() *BlockChainClient {
-	client, err := ethclient.Dial("RPC LINK")
+	client, err := ethclient.Dial("https://sepolia.infura.io/v3/cc504c934b524590bdc598a83f0cdcfd")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	contractAddress := common.HexToAddress("contract address here")
+	contractAddress := common.HexToAddress("0x9501dD95F4f9f502570e579cc54D42af02E63d99")
 
 	contractInstance, err := certificate.NewCertificate(contractAddress, client)
 	if err != nil {
@@ -32,4 +32,20 @@ func Init() *BlockChainClient {
 		Client:   client,
 		Contract: contractInstance,
 	}
+}
+
+func (bc *BlockChainClient) VerifyCertificate(certificateID [32]byte) error {
+
+	result, err := bc.Contract.VerifyCertificate(
+		nil,
+		certificateID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(result)
+
+	return nil
 }
