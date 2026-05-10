@@ -14,6 +14,12 @@ type Config struct {
 	PrivateKey      string
 	ContractAddress string
 	ChainId         int
+	PgUsername      string
+	PgPassword      string
+	PgHost          string
+	PgPort          string
+	PgDatabaseName  string
+	PgSSLMode       string
 }
 
 func LoadConfig() *Config {
@@ -31,10 +37,18 @@ func LoadConfig() *Config {
 	}
 
 	cfg := &Config{
+		// blockchain
 		SepoliaRPCURL:   os.Getenv("SEPOLIA_RPC_URL"),
 		PrivateKey:      os.Getenv("PRIVATE_KEY"),
 		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
 		ChainId:         chainID,
+		// postgres
+		PgUsername:     os.Getenv(""),
+		PgPassword:     os.Getenv(""),
+		PgHost:         os.Getenv(""),
+		PgPort:         os.Getenv(""),
+		PgDatabaseName: os.Getenv(""),
+		PgSSLMode:      os.Getenv(""),
 	}
 
 	return cfg
