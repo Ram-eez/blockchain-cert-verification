@@ -1,17 +1,18 @@
 package blockchain
 
 type IssueCertificateRequest struct {
-	RecipientName string
-	CourseName    string
-	Grade         string
-	UniqueSeed    string
+	PdfHash          [32]byte
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuingAuthority string
 }
 
 type VerifyCertificateResponse struct {
-	RecipientName string
-	CourseName    string
-	Grade         string
-	IssueDate     uint64
-	IssuedBy      string
-	IsValid       bool
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuingAuthority string
+	IssueDate        uint64
+	IsValid          bool
 }

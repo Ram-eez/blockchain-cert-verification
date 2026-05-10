@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -16,8 +17,11 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
+	envPath, err := findEnvFile()
 	if err != nil {
+		log.Fatal("failed to find .env")
+	}
+	if err := godotenv.Load(envPath); err != nil {
 		log.Fatal("failed to load .env")
 	}
 
@@ -34,4 +38,23 @@ func LoadConfig() *Config {
 	}
 
 	return cfg
+}
+
+func findEnvFile() (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		candidate := filepath.Join(currentDir, ".env")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, nil
+		}
+		parent := filepath.Dir(currentDir)
+		if parent == currentDir {
+			return "", os.ErrNotExist
+		}
+		currentDir = parent
+	}
 }

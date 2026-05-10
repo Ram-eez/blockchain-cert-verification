@@ -10,7 +10,7 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "certificateId",
+        "name": "pdfHash",
         "type": "bytes32"
       },
       {
@@ -26,10 +26,10 @@
         "type": "string"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "issuedBy",
-        "type": "address"
+        "indexed": false,
+        "internalType": "string",
+        "name": "issuingAuthority",
+        "type": "string"
       },
       {
         "indexed": false,
@@ -47,14 +47,8 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "certificateId",
+        "name": "pdfHash",
         "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "revokedBy",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -67,106 +61,10 @@
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "issuer",
-        "type": "address"
-      }
-    ],
-    "name": "IssuerAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "issuer",
-        "type": "address"
-      }
-    ],
-    "name": "IssuerRemoved",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_issuer",
-        "type": "address"
-      }
-    ],
-    "name": "addIssuer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedIssuers",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_seed",
-        "type": "string"
-      }
-    ],
-    "name": "generateCertificateId",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_addr",
-        "type": "address"
-      }
-    ],
-    "name": "isAuthorized",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "_certificateId",
+        "name": "_pdfHash",
         "type": "bytes32"
       }
     ],
@@ -184,6 +82,11 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "_pdfHash",
+        "type": "bytes32"
+      },
+      {
         "internalType": "string",
         "name": "_recipientName",
         "type": "string"
@@ -200,18 +103,12 @@
       },
       {
         "internalType": "string",
-        "name": "_uniqueSeed",
+        "name": "_issuingAuthority",
         "type": "string"
       }
     ],
     "name": "issueCertificate",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -231,21 +128,8 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_issuer",
-        "type": "address"
-      }
-    ],
-    "name": "removeIssuer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
-        "name": "_certificateId",
+        "name": "_pdfHash",
         "type": "bytes32"
       }
     ],
@@ -258,7 +142,7 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "_certificateId",
+        "name": "_pdfHash",
         "type": "bytes32"
       }
     ],
@@ -280,14 +164,14 @@
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "issuingAuthority",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
         "name": "issueDate",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "issuedBy",
-        "type": "address"
       },
       {
         "internalType": "bool",

@@ -52,7 +52,7 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		return err
 	}
 
-	tx, err := bcc.contract.IssueCertificate(auth, req.RecipientName, req.CourseName, req.Grade, req.UniqueSeed)
+	tx, err := bcc.contract.IssueCertificate(auth, req.PdfHash, req.RecipientName, req.CourseName, req.Grade, req.IssuingAuthority)
 	if err != nil {
 		return err
 	}
@@ -70,12 +70,12 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, certificate
 	}
 
 	return &VerifyCertificateResponse{
-		RecipientName: result.RecipientName,
-		CourseName:    result.CourseName,
-		Grade:         result.Grade,
-		IssueDate:     result.IssueDate.Uint64(),
-		IssuedBy:      result.IssuedBy.Hex(),
-		IsValid:       result.IsValid,
+		RecipientName:    result.RecipientName,
+		CourseName:       result.CourseName,
+		Grade:            result.Grade,
+		IssuingAuthority: result.IssuingAuthority,
+		IssueDate:        result.IssueDate.Uint64(),
+		IsValid:          result.IsValid,
 	}, nil
 }
 

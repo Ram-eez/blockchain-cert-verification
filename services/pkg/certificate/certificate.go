@@ -31,7 +31,7 @@ var (
 
 // CertificateMetaData contains all meta data concerning the Certificate contract.
 var CertificateMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"certificateId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"recipientName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"courseName\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"issuedBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"issueDate\",\"type\":\"uint256\"}],\"name\":\"CertificateIssued\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"certificateId\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"revokedBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"revokeDate\",\"type\":\"uint256\"}],\"name\":\"CertificateRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"issuer\",\"type\":\"address\"}],\"name\":\"IssuerAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"issuer\",\"type\":\"address\"}],\"name\":\"IssuerRemoved\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_issuer\",\"type\":\"address\"}],\"name\":\"addIssuer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"authorizedIssuers\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_seed\",\"type\":\"string\"}],\"name\":\"generateCertificateId\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"}],\"name\":\"isAuthorized\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_certificateId\",\"type\":\"bytes32\"}],\"name\":\"isCertificateValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_recipientName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_courseName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_grade\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_uniqueSeed\",\"type\":\"string\"}],\"name\":\"issueCertificate\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_issuer\",\"type\":\"address\"}],\"name\":\"removeIssuer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_certificateId\",\"type\":\"bytes32\"}],\"name\":\"revokeCertificate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_certificateId\",\"type\":\"bytes32\"}],\"name\":\"verifyCertificate\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"recipientName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"courseName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"grade\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"issueDate\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"issuedBy\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"isValid\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"pdfHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"recipientName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"courseName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"issuingAuthority\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"issueDate\",\"type\":\"uint256\"}],\"name\":\"CertificateIssued\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"pdfHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"revokeDate\",\"type\":\"uint256\"}],\"name\":\"CertificateRevoked\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_pdfHash\",\"type\":\"bytes32\"}],\"name\":\"isCertificateValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_pdfHash\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"_recipientName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_courseName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_grade\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_issuingAuthority\",\"type\":\"string\"}],\"name\":\"issueCertificate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_pdfHash\",\"type\":\"bytes32\"}],\"name\":\"revokeCertificate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_pdfHash\",\"type\":\"bytes32\"}],\"name\":\"verifyCertificate\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"recipientName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"courseName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"grade\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"issuingAuthority\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"issueDate\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"isValid\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // CertificateABI is the input ABI used to generate the binding from.
@@ -180,105 +180,12 @@ func (_Certificate *CertificateTransactorRaw) Transact(opts *bind.TransactOpts, 
 	return _Certificate.Contract.contract.Transact(opts, method, params...)
 }
 
-// AuthorizedIssuers is a free data retrieval call binding the contract method 0xf731fa0f.
-//
-// Solidity: function authorizedIssuers(address ) view returns(bool)
-func (_Certificate *CertificateCaller) AuthorizedIssuers(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var out []interface{}
-	err := _Certificate.contract.Call(opts, &out, "authorizedIssuers", arg0)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// AuthorizedIssuers is a free data retrieval call binding the contract method 0xf731fa0f.
-//
-// Solidity: function authorizedIssuers(address ) view returns(bool)
-func (_Certificate *CertificateSession) AuthorizedIssuers(arg0 common.Address) (bool, error) {
-	return _Certificate.Contract.AuthorizedIssuers(&_Certificate.CallOpts, arg0)
-}
-
-// AuthorizedIssuers is a free data retrieval call binding the contract method 0xf731fa0f.
-//
-// Solidity: function authorizedIssuers(address ) view returns(bool)
-func (_Certificate *CertificateCallerSession) AuthorizedIssuers(arg0 common.Address) (bool, error) {
-	return _Certificate.Contract.AuthorizedIssuers(&_Certificate.CallOpts, arg0)
-}
-
-// GenerateCertificateId is a free data retrieval call binding the contract method 0xeef79cbc.
-//
-// Solidity: function generateCertificateId(string _seed) pure returns(bytes32)
-func (_Certificate *CertificateCaller) GenerateCertificateId(opts *bind.CallOpts, _seed string) ([32]byte, error) {
-	var out []interface{}
-	err := _Certificate.contract.Call(opts, &out, "generateCertificateId", _seed)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// GenerateCertificateId is a free data retrieval call binding the contract method 0xeef79cbc.
-//
-// Solidity: function generateCertificateId(string _seed) pure returns(bytes32)
-func (_Certificate *CertificateSession) GenerateCertificateId(_seed string) ([32]byte, error) {
-	return _Certificate.Contract.GenerateCertificateId(&_Certificate.CallOpts, _seed)
-}
-
-// GenerateCertificateId is a free data retrieval call binding the contract method 0xeef79cbc.
-//
-// Solidity: function generateCertificateId(string _seed) pure returns(bytes32)
-func (_Certificate *CertificateCallerSession) GenerateCertificateId(_seed string) ([32]byte, error) {
-	return _Certificate.Contract.GenerateCertificateId(&_Certificate.CallOpts, _seed)
-}
-
-// IsAuthorized is a free data retrieval call binding the contract method 0xfe9fbb80.
-//
-// Solidity: function isAuthorized(address _addr) view returns(bool)
-func (_Certificate *CertificateCaller) IsAuthorized(opts *bind.CallOpts, _addr common.Address) (bool, error) {
-	var out []interface{}
-	err := _Certificate.contract.Call(opts, &out, "isAuthorized", _addr)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// IsAuthorized is a free data retrieval call binding the contract method 0xfe9fbb80.
-//
-// Solidity: function isAuthorized(address _addr) view returns(bool)
-func (_Certificate *CertificateSession) IsAuthorized(_addr common.Address) (bool, error) {
-	return _Certificate.Contract.IsAuthorized(&_Certificate.CallOpts, _addr)
-}
-
-// IsAuthorized is a free data retrieval call binding the contract method 0xfe9fbb80.
-//
-// Solidity: function isAuthorized(address _addr) view returns(bool)
-func (_Certificate *CertificateCallerSession) IsAuthorized(_addr common.Address) (bool, error) {
-	return _Certificate.Contract.IsAuthorized(&_Certificate.CallOpts, _addr)
-}
-
 // IsCertificateValid is a free data retrieval call binding the contract method 0x05714099.
 //
-// Solidity: function isCertificateValid(bytes32 _certificateId) view returns(bool)
-func (_Certificate *CertificateCaller) IsCertificateValid(opts *bind.CallOpts, _certificateId [32]byte) (bool, error) {
+// Solidity: function isCertificateValid(bytes32 _pdfHash) view returns(bool)
+func (_Certificate *CertificateCaller) IsCertificateValid(opts *bind.CallOpts, _pdfHash [32]byte) (bool, error) {
 	var out []interface{}
-	err := _Certificate.contract.Call(opts, &out, "isCertificateValid", _certificateId)
+	err := _Certificate.contract.Call(opts, &out, "isCertificateValid", _pdfHash)
 
 	if err != nil {
 		return *new(bool), err
@@ -292,16 +199,16 @@ func (_Certificate *CertificateCaller) IsCertificateValid(opts *bind.CallOpts, _
 
 // IsCertificateValid is a free data retrieval call binding the contract method 0x05714099.
 //
-// Solidity: function isCertificateValid(bytes32 _certificateId) view returns(bool)
-func (_Certificate *CertificateSession) IsCertificateValid(_certificateId [32]byte) (bool, error) {
-	return _Certificate.Contract.IsCertificateValid(&_Certificate.CallOpts, _certificateId)
+// Solidity: function isCertificateValid(bytes32 _pdfHash) view returns(bool)
+func (_Certificate *CertificateSession) IsCertificateValid(_pdfHash [32]byte) (bool, error) {
+	return _Certificate.Contract.IsCertificateValid(&_Certificate.CallOpts, _pdfHash)
 }
 
 // IsCertificateValid is a free data retrieval call binding the contract method 0x05714099.
 //
-// Solidity: function isCertificateValid(bytes32 _certificateId) view returns(bool)
-func (_Certificate *CertificateCallerSession) IsCertificateValid(_certificateId [32]byte) (bool, error) {
-	return _Certificate.Contract.IsCertificateValid(&_Certificate.CallOpts, _certificateId)
+// Solidity: function isCertificateValid(bytes32 _pdfHash) view returns(bool)
+func (_Certificate *CertificateCallerSession) IsCertificateValid(_pdfHash [32]byte) (bool, error) {
+	return _Certificate.Contract.IsCertificateValid(&_Certificate.CallOpts, _pdfHash)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -337,25 +244,25 @@ func (_Certificate *CertificateCallerSession) Owner() (common.Address, error) {
 
 // VerifyCertificate is a free data retrieval call binding the contract method 0x850c1768.
 //
-// Solidity: function verifyCertificate(bytes32 _certificateId) view returns(string recipientName, string courseName, string grade, uint256 issueDate, address issuedBy, bool isValid)
-func (_Certificate *CertificateCaller) VerifyCertificate(opts *bind.CallOpts, _certificateId [32]byte) (struct {
-	RecipientName string
-	CourseName    string
-	Grade         string
-	IssueDate     *big.Int
-	IssuedBy      common.Address
-	IsValid       bool
+// Solidity: function verifyCertificate(bytes32 _pdfHash) view returns(string recipientName, string courseName, string grade, string issuingAuthority, uint256 issueDate, bool isValid)
+func (_Certificate *CertificateCaller) VerifyCertificate(opts *bind.CallOpts, _pdfHash [32]byte) (struct {
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuingAuthority string
+	IssueDate        *big.Int
+	IsValid          bool
 }, error) {
 	var out []interface{}
-	err := _Certificate.contract.Call(opts, &out, "verifyCertificate", _certificateId)
+	err := _Certificate.contract.Call(opts, &out, "verifyCertificate", _pdfHash)
 
 	outstruct := new(struct {
-		RecipientName string
-		CourseName    string
-		Grade         string
-		IssueDate     *big.Int
-		IssuedBy      common.Address
-		IsValid       bool
+		RecipientName    string
+		CourseName       string
+		Grade            string
+		IssuingAuthority string
+		IssueDate        *big.Int
+		IsValid          bool
 	})
 	if err != nil {
 		return *outstruct, err
@@ -364,8 +271,8 @@ func (_Certificate *CertificateCaller) VerifyCertificate(opts *bind.CallOpts, _c
 	outstruct.RecipientName = *abi.ConvertType(out[0], new(string)).(*string)
 	outstruct.CourseName = *abi.ConvertType(out[1], new(string)).(*string)
 	outstruct.Grade = *abi.ConvertType(out[2], new(string)).(*string)
-	outstruct.IssueDate = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
-	outstruct.IssuedBy = *abi.ConvertType(out[4], new(common.Address)).(*common.Address)
+	outstruct.IssuingAuthority = *abi.ConvertType(out[3], new(string)).(*string)
+	outstruct.IssueDate = *abi.ConvertType(out[4], new(*big.Int)).(**big.Int)
 	outstruct.IsValid = *abi.ConvertType(out[5], new(bool)).(*bool)
 
 	return *outstruct, err
@@ -374,114 +281,72 @@ func (_Certificate *CertificateCaller) VerifyCertificate(opts *bind.CallOpts, _c
 
 // VerifyCertificate is a free data retrieval call binding the contract method 0x850c1768.
 //
-// Solidity: function verifyCertificate(bytes32 _certificateId) view returns(string recipientName, string courseName, string grade, uint256 issueDate, address issuedBy, bool isValid)
-func (_Certificate *CertificateSession) VerifyCertificate(_certificateId [32]byte) (struct {
-	RecipientName string
-	CourseName    string
-	Grade         string
-	IssueDate     *big.Int
-	IssuedBy      common.Address
-	IsValid       bool
+// Solidity: function verifyCertificate(bytes32 _pdfHash) view returns(string recipientName, string courseName, string grade, string issuingAuthority, uint256 issueDate, bool isValid)
+func (_Certificate *CertificateSession) VerifyCertificate(_pdfHash [32]byte) (struct {
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuingAuthority string
+	IssueDate        *big.Int
+	IsValid          bool
 }, error) {
-	return _Certificate.Contract.VerifyCertificate(&_Certificate.CallOpts, _certificateId)
+	return _Certificate.Contract.VerifyCertificate(&_Certificate.CallOpts, _pdfHash)
 }
 
 // VerifyCertificate is a free data retrieval call binding the contract method 0x850c1768.
 //
-// Solidity: function verifyCertificate(bytes32 _certificateId) view returns(string recipientName, string courseName, string grade, uint256 issueDate, address issuedBy, bool isValid)
-func (_Certificate *CertificateCallerSession) VerifyCertificate(_certificateId [32]byte) (struct {
-	RecipientName string
-	CourseName    string
-	Grade         string
-	IssueDate     *big.Int
-	IssuedBy      common.Address
-	IsValid       bool
+// Solidity: function verifyCertificate(bytes32 _pdfHash) view returns(string recipientName, string courseName, string grade, string issuingAuthority, uint256 issueDate, bool isValid)
+func (_Certificate *CertificateCallerSession) VerifyCertificate(_pdfHash [32]byte) (struct {
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuingAuthority string
+	IssueDate        *big.Int
+	IsValid          bool
 }, error) {
-	return _Certificate.Contract.VerifyCertificate(&_Certificate.CallOpts, _certificateId)
+	return _Certificate.Contract.VerifyCertificate(&_Certificate.CallOpts, _pdfHash)
 }
 
-// AddIssuer is a paid mutator transaction binding the contract method 0x20694db0.
+// IssueCertificate is a paid mutator transaction binding the contract method 0xdfd72020.
 //
-// Solidity: function addIssuer(address _issuer) returns()
-func (_Certificate *CertificateTransactor) AddIssuer(opts *bind.TransactOpts, _issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.contract.Transact(opts, "addIssuer", _issuer)
+// Solidity: function issueCertificate(bytes32 _pdfHash, string _recipientName, string _courseName, string _grade, string _issuingAuthority) returns()
+func (_Certificate *CertificateTransactor) IssueCertificate(opts *bind.TransactOpts, _pdfHash [32]byte, _recipientName string, _courseName string, _grade string, _issuingAuthority string) (*types.Transaction, error) {
+	return _Certificate.contract.Transact(opts, "issueCertificate", _pdfHash, _recipientName, _courseName, _grade, _issuingAuthority)
 }
 
-// AddIssuer is a paid mutator transaction binding the contract method 0x20694db0.
+// IssueCertificate is a paid mutator transaction binding the contract method 0xdfd72020.
 //
-// Solidity: function addIssuer(address _issuer) returns()
-func (_Certificate *CertificateSession) AddIssuer(_issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.Contract.AddIssuer(&_Certificate.TransactOpts, _issuer)
+// Solidity: function issueCertificate(bytes32 _pdfHash, string _recipientName, string _courseName, string _grade, string _issuingAuthority) returns()
+func (_Certificate *CertificateSession) IssueCertificate(_pdfHash [32]byte, _recipientName string, _courseName string, _grade string, _issuingAuthority string) (*types.Transaction, error) {
+	return _Certificate.Contract.IssueCertificate(&_Certificate.TransactOpts, _pdfHash, _recipientName, _courseName, _grade, _issuingAuthority)
 }
 
-// AddIssuer is a paid mutator transaction binding the contract method 0x20694db0.
+// IssueCertificate is a paid mutator transaction binding the contract method 0xdfd72020.
 //
-// Solidity: function addIssuer(address _issuer) returns()
-func (_Certificate *CertificateTransactorSession) AddIssuer(_issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.Contract.AddIssuer(&_Certificate.TransactOpts, _issuer)
-}
-
-// IssueCertificate is a paid mutator transaction binding the contract method 0x818a2994.
-//
-// Solidity: function issueCertificate(string _recipientName, string _courseName, string _grade, string _uniqueSeed) returns(bytes32)
-func (_Certificate *CertificateTransactor) IssueCertificate(opts *bind.TransactOpts, _recipientName string, _courseName string, _grade string, _uniqueSeed string) (*types.Transaction, error) {
-	return _Certificate.contract.Transact(opts, "issueCertificate", _recipientName, _courseName, _grade, _uniqueSeed)
-}
-
-// IssueCertificate is a paid mutator transaction binding the contract method 0x818a2994.
-//
-// Solidity: function issueCertificate(string _recipientName, string _courseName, string _grade, string _uniqueSeed) returns(bytes32)
-func (_Certificate *CertificateSession) IssueCertificate(_recipientName string, _courseName string, _grade string, _uniqueSeed string) (*types.Transaction, error) {
-	return _Certificate.Contract.IssueCertificate(&_Certificate.TransactOpts, _recipientName, _courseName, _grade, _uniqueSeed)
-}
-
-// IssueCertificate is a paid mutator transaction binding the contract method 0x818a2994.
-//
-// Solidity: function issueCertificate(string _recipientName, string _courseName, string _grade, string _uniqueSeed) returns(bytes32)
-func (_Certificate *CertificateTransactorSession) IssueCertificate(_recipientName string, _courseName string, _grade string, _uniqueSeed string) (*types.Transaction, error) {
-	return _Certificate.Contract.IssueCertificate(&_Certificate.TransactOpts, _recipientName, _courseName, _grade, _uniqueSeed)
-}
-
-// RemoveIssuer is a paid mutator transaction binding the contract method 0x47bc7093.
-//
-// Solidity: function removeIssuer(address _issuer) returns()
-func (_Certificate *CertificateTransactor) RemoveIssuer(opts *bind.TransactOpts, _issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.contract.Transact(opts, "removeIssuer", _issuer)
-}
-
-// RemoveIssuer is a paid mutator transaction binding the contract method 0x47bc7093.
-//
-// Solidity: function removeIssuer(address _issuer) returns()
-func (_Certificate *CertificateSession) RemoveIssuer(_issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.Contract.RemoveIssuer(&_Certificate.TransactOpts, _issuer)
-}
-
-// RemoveIssuer is a paid mutator transaction binding the contract method 0x47bc7093.
-//
-// Solidity: function removeIssuer(address _issuer) returns()
-func (_Certificate *CertificateTransactorSession) RemoveIssuer(_issuer common.Address) (*types.Transaction, error) {
-	return _Certificate.Contract.RemoveIssuer(&_Certificate.TransactOpts, _issuer)
+// Solidity: function issueCertificate(bytes32 _pdfHash, string _recipientName, string _courseName, string _grade, string _issuingAuthority) returns()
+func (_Certificate *CertificateTransactorSession) IssueCertificate(_pdfHash [32]byte, _recipientName string, _courseName string, _grade string, _issuingAuthority string) (*types.Transaction, error) {
+	return _Certificate.Contract.IssueCertificate(&_Certificate.TransactOpts, _pdfHash, _recipientName, _courseName, _grade, _issuingAuthority)
 }
 
 // RevokeCertificate is a paid mutator transaction binding the contract method 0xc6cbc52a.
 //
-// Solidity: function revokeCertificate(bytes32 _certificateId) returns()
-func (_Certificate *CertificateTransactor) RevokeCertificate(opts *bind.TransactOpts, _certificateId [32]byte) (*types.Transaction, error) {
-	return _Certificate.contract.Transact(opts, "revokeCertificate", _certificateId)
+// Solidity: function revokeCertificate(bytes32 _pdfHash) returns()
+func (_Certificate *CertificateTransactor) RevokeCertificate(opts *bind.TransactOpts, _pdfHash [32]byte) (*types.Transaction, error) {
+	return _Certificate.contract.Transact(opts, "revokeCertificate", _pdfHash)
 }
 
 // RevokeCertificate is a paid mutator transaction binding the contract method 0xc6cbc52a.
 //
-// Solidity: function revokeCertificate(bytes32 _certificateId) returns()
-func (_Certificate *CertificateSession) RevokeCertificate(_certificateId [32]byte) (*types.Transaction, error) {
-	return _Certificate.Contract.RevokeCertificate(&_Certificate.TransactOpts, _certificateId)
+// Solidity: function revokeCertificate(bytes32 _pdfHash) returns()
+func (_Certificate *CertificateSession) RevokeCertificate(_pdfHash [32]byte) (*types.Transaction, error) {
+	return _Certificate.Contract.RevokeCertificate(&_Certificate.TransactOpts, _pdfHash)
 }
 
 // RevokeCertificate is a paid mutator transaction binding the contract method 0xc6cbc52a.
 //
-// Solidity: function revokeCertificate(bytes32 _certificateId) returns()
-func (_Certificate *CertificateTransactorSession) RevokeCertificate(_certificateId [32]byte) (*types.Transaction, error) {
-	return _Certificate.Contract.RevokeCertificate(&_Certificate.TransactOpts, _certificateId)
+// Solidity: function revokeCertificate(bytes32 _pdfHash) returns()
+func (_Certificate *CertificateTransactorSession) RevokeCertificate(_pdfHash [32]byte) (*types.Transaction, error) {
+	return _Certificate.Contract.RevokeCertificate(&_Certificate.TransactOpts, _pdfHash)
 }
 
 // CertificateCertificateIssuedIterator is returned from FilterCertificateIssued and is used to iterate over the raw logs and unpacked data for CertificateIssued events raised by the Certificate contract.
@@ -553,52 +418,42 @@ func (it *CertificateCertificateIssuedIterator) Close() error {
 
 // CertificateCertificateIssued represents a CertificateIssued event raised by the Certificate contract.
 type CertificateCertificateIssued struct {
-	CertificateId [32]byte
-	RecipientName string
-	CourseName    string
-	IssuedBy      common.Address
-	IssueDate     *big.Int
-	Raw           types.Log // Blockchain specific contextual infos
+	PdfHash          [32]byte
+	RecipientName    string
+	CourseName       string
+	IssuingAuthority string
+	IssueDate        *big.Int
+	Raw              types.Log // Blockchain specific contextual infos
 }
 
-// FilterCertificateIssued is a free log retrieval operation binding the contract event 0xb3e83b59ef441b355e89ba1c1cf64fcbea183a70cda9a091f7515e6f0edd0efa.
+// FilterCertificateIssued is a free log retrieval operation binding the contract event 0x609da1dc5a288b98d4d6e35acd31d48b7967dea867215e051fb04d53fcd686eb.
 //
-// Solidity: event CertificateIssued(bytes32 indexed certificateId, string recipientName, string courseName, address indexed issuedBy, uint256 issueDate)
-func (_Certificate *CertificateFilterer) FilterCertificateIssued(opts *bind.FilterOpts, certificateId [][32]byte, issuedBy []common.Address) (*CertificateCertificateIssuedIterator, error) {
+// Solidity: event CertificateIssued(bytes32 indexed pdfHash, string recipientName, string courseName, string issuingAuthority, uint256 issueDate)
+func (_Certificate *CertificateFilterer) FilterCertificateIssued(opts *bind.FilterOpts, pdfHash [][32]byte) (*CertificateCertificateIssuedIterator, error) {
 
-	var certificateIdRule []interface{}
-	for _, certificateIdItem := range certificateId {
-		certificateIdRule = append(certificateIdRule, certificateIdItem)
+	var pdfHashRule []interface{}
+	for _, pdfHashItem := range pdfHash {
+		pdfHashRule = append(pdfHashRule, pdfHashItem)
 	}
 
-	var issuedByRule []interface{}
-	for _, issuedByItem := range issuedBy {
-		issuedByRule = append(issuedByRule, issuedByItem)
-	}
-
-	logs, sub, err := _Certificate.contract.FilterLogs(opts, "CertificateIssued", certificateIdRule, issuedByRule)
+	logs, sub, err := _Certificate.contract.FilterLogs(opts, "CertificateIssued", pdfHashRule)
 	if err != nil {
 		return nil, err
 	}
 	return &CertificateCertificateIssuedIterator{contract: _Certificate.contract, event: "CertificateIssued", logs: logs, sub: sub}, nil
 }
 
-// WatchCertificateIssued is a free log subscription operation binding the contract event 0xb3e83b59ef441b355e89ba1c1cf64fcbea183a70cda9a091f7515e6f0edd0efa.
+// WatchCertificateIssued is a free log subscription operation binding the contract event 0x609da1dc5a288b98d4d6e35acd31d48b7967dea867215e051fb04d53fcd686eb.
 //
-// Solidity: event CertificateIssued(bytes32 indexed certificateId, string recipientName, string courseName, address indexed issuedBy, uint256 issueDate)
-func (_Certificate *CertificateFilterer) WatchCertificateIssued(opts *bind.WatchOpts, sink chan<- *CertificateCertificateIssued, certificateId [][32]byte, issuedBy []common.Address) (event.Subscription, error) {
+// Solidity: event CertificateIssued(bytes32 indexed pdfHash, string recipientName, string courseName, string issuingAuthority, uint256 issueDate)
+func (_Certificate *CertificateFilterer) WatchCertificateIssued(opts *bind.WatchOpts, sink chan<- *CertificateCertificateIssued, pdfHash [][32]byte) (event.Subscription, error) {
 
-	var certificateIdRule []interface{}
-	for _, certificateIdItem := range certificateId {
-		certificateIdRule = append(certificateIdRule, certificateIdItem)
+	var pdfHashRule []interface{}
+	for _, pdfHashItem := range pdfHash {
+		pdfHashRule = append(pdfHashRule, pdfHashItem)
 	}
 
-	var issuedByRule []interface{}
-	for _, issuedByItem := range issuedBy {
-		issuedByRule = append(issuedByRule, issuedByItem)
-	}
-
-	logs, sub, err := _Certificate.contract.WatchLogs(opts, "CertificateIssued", certificateIdRule, issuedByRule)
+	logs, sub, err := _Certificate.contract.WatchLogs(opts, "CertificateIssued", pdfHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -630,9 +485,9 @@ func (_Certificate *CertificateFilterer) WatchCertificateIssued(opts *bind.Watch
 	}), nil
 }
 
-// ParseCertificateIssued is a log parse operation binding the contract event 0xb3e83b59ef441b355e89ba1c1cf64fcbea183a70cda9a091f7515e6f0edd0efa.
+// ParseCertificateIssued is a log parse operation binding the contract event 0x609da1dc5a288b98d4d6e35acd31d48b7967dea867215e051fb04d53fcd686eb.
 //
-// Solidity: event CertificateIssued(bytes32 indexed certificateId, string recipientName, string courseName, address indexed issuedBy, uint256 issueDate)
+// Solidity: event CertificateIssued(bytes32 indexed pdfHash, string recipientName, string courseName, string issuingAuthority, uint256 issueDate)
 func (_Certificate *CertificateFilterer) ParseCertificateIssued(log types.Log) (*CertificateCertificateIssued, error) {
 	event := new(CertificateCertificateIssued)
 	if err := _Certificate.contract.UnpackLog(event, "CertificateIssued", log); err != nil {
@@ -711,48 +566,39 @@ func (it *CertificateCertificateRevokedIterator) Close() error {
 
 // CertificateCertificateRevoked represents a CertificateRevoked event raised by the Certificate contract.
 type CertificateCertificateRevoked struct {
-	CertificateId [32]byte
-	RevokedBy     common.Address
-	RevokeDate    *big.Int
-	Raw           types.Log // Blockchain specific contextual infos
+	PdfHash    [32]byte
+	RevokeDate *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterCertificateRevoked is a free log retrieval operation binding the contract event 0x85fe6dd2dfc4757558754564c7ff020182ec3c918257c2ff3a217a63791ec24f.
+// FilterCertificateRevoked is a free log retrieval operation binding the contract event 0xba2ff7aceccd1742d00e386f05d483c89cbb4e8ebf02234c436df1ec854261fd.
 //
-// Solidity: event CertificateRevoked(bytes32 indexed certificateId, address indexed revokedBy, uint256 revokeDate)
-func (_Certificate *CertificateFilterer) FilterCertificateRevoked(opts *bind.FilterOpts, certificateId [][32]byte, revokedBy []common.Address) (*CertificateCertificateRevokedIterator, error) {
+// Solidity: event CertificateRevoked(bytes32 indexed pdfHash, uint256 revokeDate)
+func (_Certificate *CertificateFilterer) FilterCertificateRevoked(opts *bind.FilterOpts, pdfHash [][32]byte) (*CertificateCertificateRevokedIterator, error) {
 
-	var certificateIdRule []interface{}
-	for _, certificateIdItem := range certificateId {
-		certificateIdRule = append(certificateIdRule, certificateIdItem)
-	}
-	var revokedByRule []interface{}
-	for _, revokedByItem := range revokedBy {
-		revokedByRule = append(revokedByRule, revokedByItem)
+	var pdfHashRule []interface{}
+	for _, pdfHashItem := range pdfHash {
+		pdfHashRule = append(pdfHashRule, pdfHashItem)
 	}
 
-	logs, sub, err := _Certificate.contract.FilterLogs(opts, "CertificateRevoked", certificateIdRule, revokedByRule)
+	logs, sub, err := _Certificate.contract.FilterLogs(opts, "CertificateRevoked", pdfHashRule)
 	if err != nil {
 		return nil, err
 	}
 	return &CertificateCertificateRevokedIterator{contract: _Certificate.contract, event: "CertificateRevoked", logs: logs, sub: sub}, nil
 }
 
-// WatchCertificateRevoked is a free log subscription operation binding the contract event 0x85fe6dd2dfc4757558754564c7ff020182ec3c918257c2ff3a217a63791ec24f.
+// WatchCertificateRevoked is a free log subscription operation binding the contract event 0xba2ff7aceccd1742d00e386f05d483c89cbb4e8ebf02234c436df1ec854261fd.
 //
-// Solidity: event CertificateRevoked(bytes32 indexed certificateId, address indexed revokedBy, uint256 revokeDate)
-func (_Certificate *CertificateFilterer) WatchCertificateRevoked(opts *bind.WatchOpts, sink chan<- *CertificateCertificateRevoked, certificateId [][32]byte, revokedBy []common.Address) (event.Subscription, error) {
+// Solidity: event CertificateRevoked(bytes32 indexed pdfHash, uint256 revokeDate)
+func (_Certificate *CertificateFilterer) WatchCertificateRevoked(opts *bind.WatchOpts, sink chan<- *CertificateCertificateRevoked, pdfHash [][32]byte) (event.Subscription, error) {
 
-	var certificateIdRule []interface{}
-	for _, certificateIdItem := range certificateId {
-		certificateIdRule = append(certificateIdRule, certificateIdItem)
-	}
-	var revokedByRule []interface{}
-	for _, revokedByItem := range revokedBy {
-		revokedByRule = append(revokedByRule, revokedByItem)
+	var pdfHashRule []interface{}
+	for _, pdfHashItem := range pdfHash {
+		pdfHashRule = append(pdfHashRule, pdfHashItem)
 	}
 
-	logs, sub, err := _Certificate.contract.WatchLogs(opts, "CertificateRevoked", certificateIdRule, revokedByRule)
+	logs, sub, err := _Certificate.contract.WatchLogs(opts, "CertificateRevoked", pdfHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -784,300 +630,12 @@ func (_Certificate *CertificateFilterer) WatchCertificateRevoked(opts *bind.Watc
 	}), nil
 }
 
-// ParseCertificateRevoked is a log parse operation binding the contract event 0x85fe6dd2dfc4757558754564c7ff020182ec3c918257c2ff3a217a63791ec24f.
+// ParseCertificateRevoked is a log parse operation binding the contract event 0xba2ff7aceccd1742d00e386f05d483c89cbb4e8ebf02234c436df1ec854261fd.
 //
-// Solidity: event CertificateRevoked(bytes32 indexed certificateId, address indexed revokedBy, uint256 revokeDate)
+// Solidity: event CertificateRevoked(bytes32 indexed pdfHash, uint256 revokeDate)
 func (_Certificate *CertificateFilterer) ParseCertificateRevoked(log types.Log) (*CertificateCertificateRevoked, error) {
 	event := new(CertificateCertificateRevoked)
 	if err := _Certificate.contract.UnpackLog(event, "CertificateRevoked", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// CertificateIssuerAddedIterator is returned from FilterIssuerAdded and is used to iterate over the raw logs and unpacked data for IssuerAdded events raised by the Certificate contract.
-type CertificateIssuerAddedIterator struct {
-	Event *CertificateIssuerAdded // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *CertificateIssuerAddedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(CertificateIssuerAdded)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(CertificateIssuerAdded)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *CertificateIssuerAddedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *CertificateIssuerAddedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// CertificateIssuerAdded represents a IssuerAdded event raised by the Certificate contract.
-type CertificateIssuerAdded struct {
-	Issuer common.Address
-	Raw    types.Log // Blockchain specific contextual infos
-}
-
-// FilterIssuerAdded is a free log retrieval operation binding the contract event 0x05e7c881d716bee8cb7ed92293133ba156704252439e5c502c277448f04e20c2.
-//
-// Solidity: event IssuerAdded(address indexed issuer)
-func (_Certificate *CertificateFilterer) FilterIssuerAdded(opts *bind.FilterOpts, issuer []common.Address) (*CertificateIssuerAddedIterator, error) {
-
-	var issuerRule []interface{}
-	for _, issuerItem := range issuer {
-		issuerRule = append(issuerRule, issuerItem)
-	}
-
-	logs, sub, err := _Certificate.contract.FilterLogs(opts, "IssuerAdded", issuerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &CertificateIssuerAddedIterator{contract: _Certificate.contract, event: "IssuerAdded", logs: logs, sub: sub}, nil
-}
-
-// WatchIssuerAdded is a free log subscription operation binding the contract event 0x05e7c881d716bee8cb7ed92293133ba156704252439e5c502c277448f04e20c2.
-//
-// Solidity: event IssuerAdded(address indexed issuer)
-func (_Certificate *CertificateFilterer) WatchIssuerAdded(opts *bind.WatchOpts, sink chan<- *CertificateIssuerAdded, issuer []common.Address) (event.Subscription, error) {
-
-	var issuerRule []interface{}
-	for _, issuerItem := range issuer {
-		issuerRule = append(issuerRule, issuerItem)
-	}
-
-	logs, sub, err := _Certificate.contract.WatchLogs(opts, "IssuerAdded", issuerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(CertificateIssuerAdded)
-				if err := _Certificate.contract.UnpackLog(event, "IssuerAdded", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseIssuerAdded is a log parse operation binding the contract event 0x05e7c881d716bee8cb7ed92293133ba156704252439e5c502c277448f04e20c2.
-//
-// Solidity: event IssuerAdded(address indexed issuer)
-func (_Certificate *CertificateFilterer) ParseIssuerAdded(log types.Log) (*CertificateIssuerAdded, error) {
-	event := new(CertificateIssuerAdded)
-	if err := _Certificate.contract.UnpackLog(event, "IssuerAdded", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// CertificateIssuerRemovedIterator is returned from FilterIssuerRemoved and is used to iterate over the raw logs and unpacked data for IssuerRemoved events raised by the Certificate contract.
-type CertificateIssuerRemovedIterator struct {
-	Event *CertificateIssuerRemoved // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *CertificateIssuerRemovedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(CertificateIssuerRemoved)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(CertificateIssuerRemoved)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *CertificateIssuerRemovedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *CertificateIssuerRemovedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// CertificateIssuerRemoved represents a IssuerRemoved event raised by the Certificate contract.
-type CertificateIssuerRemoved struct {
-	Issuer common.Address
-	Raw    types.Log // Blockchain specific contextual infos
-}
-
-// FilterIssuerRemoved is a free log retrieval operation binding the contract event 0xaf66545c919a3be306ee446d8f42a9558b5b022620df880517bc9593ec0f2d52.
-//
-// Solidity: event IssuerRemoved(address indexed issuer)
-func (_Certificate *CertificateFilterer) FilterIssuerRemoved(opts *bind.FilterOpts, issuer []common.Address) (*CertificateIssuerRemovedIterator, error) {
-
-	var issuerRule []interface{}
-	for _, issuerItem := range issuer {
-		issuerRule = append(issuerRule, issuerItem)
-	}
-
-	logs, sub, err := _Certificate.contract.FilterLogs(opts, "IssuerRemoved", issuerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &CertificateIssuerRemovedIterator{contract: _Certificate.contract, event: "IssuerRemoved", logs: logs, sub: sub}, nil
-}
-
-// WatchIssuerRemoved is a free log subscription operation binding the contract event 0xaf66545c919a3be306ee446d8f42a9558b5b022620df880517bc9593ec0f2d52.
-//
-// Solidity: event IssuerRemoved(address indexed issuer)
-func (_Certificate *CertificateFilterer) WatchIssuerRemoved(opts *bind.WatchOpts, sink chan<- *CertificateIssuerRemoved, issuer []common.Address) (event.Subscription, error) {
-
-	var issuerRule []interface{}
-	for _, issuerItem := range issuer {
-		issuerRule = append(issuerRule, issuerItem)
-	}
-
-	logs, sub, err := _Certificate.contract.WatchLogs(opts, "IssuerRemoved", issuerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(CertificateIssuerRemoved)
-				if err := _Certificate.contract.UnpackLog(event, "IssuerRemoved", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseIssuerRemoved is a log parse operation binding the contract event 0xaf66545c919a3be306ee446d8f42a9558b5b022620df880517bc9593ec0f2d52.
-//
-// Solidity: event IssuerRemoved(address indexed issuer)
-func (_Certificate *CertificateFilterer) ParseIssuerRemoved(log types.Log) (*CertificateIssuerRemoved, error) {
-	event := new(CertificateIssuerRemoved)
-	if err := _Certificate.contract.UnpackLog(event, "IssuerRemoved", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
