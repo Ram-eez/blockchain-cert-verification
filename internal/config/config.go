@@ -3,72 +3,57 @@ package config
 import (
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
+	// blockchain
 	SepoliaRPCURL   string
 	PrivateKey      string
 	ContractAddress string
 	ChainId         int
-	PgUsername      string
-	PgPassword      string
-	PgHost          string
-	PgPort          string
-	PgDatabaseName  string
-	PgSSLMode       string
+
+	// postgres
+	PgUsername     string
+	PgPassword     string
+	PgHost         string
+	PgPort         string
+	PgDatabaseName string
+	PgSSLMode      string
 }
 
 func LoadConfig() *Config {
-	envPath, err := findEnvFile()
-	if err != nil {
-		log.Fatal("failed to find .env")
-	}
-	if err := godotenv.Load(envPath); err != nil {
-		log.Fatal("failed to load .env")
-	}
 
 	chainID, err := strconv.Atoi(os.Getenv("CHAIN_ID"))
 	if err != nil {
-		log.Fatal("invalid chain id")
+		log.Fatal("invalid CHAIN_ID")
 	}
 
 	cfg := &Config{
 		// blockchain
-		SepoliaRPCURL:   os.Getenv("SEPOLIA_RPC_URL"),
-		PrivateKey:      os.Getenv("PRIVATE_KEY"),
-		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
+		SepoliaRPCURL:   mustEnv("SEPOLIA_RPC_URL"),
+		PrivateKey:      mustEnv("PRIVATE_KEY"),
+		ContractAddress: mustEnv("CONTRACT_ADDRESS"),
 		ChainId:         chainID,
+
 		// postgres
-		PgUsername:     os.Getenv(""),
-		PgPassword:     os.Getenv(""),
-		PgHost:         os.Getenv(""),
-		PgPort:         os.Getenv(""),
-		PgDatabaseName: os.Getenv(""),
-		PgSSLMode:      os.Getenv(""),
+		PgUsername:     mustEnv("PG_USERNAME"),
+		PgPassword:     mustEnv("PG_PASSWORD"),
+		PgHost:         mustEnv("PG_HOST"),
+		PgPort:         mustEnv("PG_PORT"),
+		PgDatabaseName: mustEnv("PG_DATABASE_NAME"),
+		PgSSLMode:      mustEnv("PG_SSL_MODE"),
 	}
 
 	return cfg
 }
 
-func findEnvFile() (string, error) {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return "", err
+func mustEnv(key string) string {
+	value := os.Getenv(key)
+
+	if value == "" {
+		log.Fatalf("missing environment variable: %s", key)
 	}
 
-	for {
-		candidate := filepath.Join(currentDir, ".env")
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate, nil
-		}
-		parent := filepath.Dir(currentDir)
-		if parent == currentDir {
-			return "", os.ErrNotExist
-		}
-		currentDir = parent
-	}
+	return value
 }

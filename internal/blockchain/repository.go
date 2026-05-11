@@ -2,15 +2,15 @@ package blockchain
 
 import "github.com/jackc/pgx/v5/pgxpool"
 
-type BlockChainRepository interface {
+type ProjectRepository interface {
 }
 
-type blockChainRepository struct {
+type projectRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewBlockChainRepository(db *pgxpool.Pool) BlockChainRepository {
-	return &blockChainRepository{
+func NewProjectRepository(db *pgxpool.Pool) ProjectRepository {
+	return &projectRepository{
 		db: db,
 	}
 }

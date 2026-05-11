@@ -1,14 +1,25 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"blockchain/bootstrap"
+	"blockchain/internal/config"
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	router := gin.Default()
+	// get env vars and load config
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("failed to load .env")
+	}
+	cfg := config.LoadConfig()
 
-	//cfg := config.LoadConfig()
+	appServer, err := bootstrap.InitializeApplication(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	router.Run(":8080")
+	appServer.Start()
 
 }

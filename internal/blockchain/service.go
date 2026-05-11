@@ -24,9 +24,10 @@ type blockChainService struct {
 	cnf      *config.Config
 	client   *ethclient.Client
 	contract *certificate.Certificate
+	repo     ProjectRepository
 }
 
-func NewBlockChainService(cnf *config.Config) BlockChainService {
+func NewBlockChainService(cnf *config.Config, repo ProjectRepository) BlockChainService {
 	client, err := ethclient.Dial(cnf.SepoliaRPCURL)
 	if err != nil {
 		log.Fatal(err)
@@ -43,6 +44,7 @@ func NewBlockChainService(cnf *config.Config) BlockChainService {
 		cnf:      cnf,
 		client:   client,
 		contract: contractInstance,
+		repo:     repo,
 	}
 }
 

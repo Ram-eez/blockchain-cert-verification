@@ -93,7 +93,7 @@ func newTestService(t *testing.T) BlockChainService {
 	t.Helper()
 
 	cfg := config.LoadConfig()
-	return NewBlockChainService(cfg)
+	return NewBlockChainService(cfg, nil)
 }
 
 func randomHash(t *testing.T) [32]byte {
