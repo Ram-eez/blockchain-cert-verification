@@ -18,18 +18,14 @@ func NewMiddleware() Middleware {
 	return &middleware{}
 }
 
-func (m *middleware) AuthorizeJWT(
-	c *gin.Context,
-) {
+func (m *middleware) AuthorizeJWT(c *gin.Context) {
 
 	authHeader := c.GetHeader("Authorization")
 
 	if authHeader == "" {
 		c.AbortWithStatusJSON(
 			http.StatusUnauthorized,
-			gin.H{
-				"error": "missing authorization header",
-			},
+			gin.H{"error": "missing authorization header"},
 		)
 		return
 	}

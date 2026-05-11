@@ -5,20 +5,28 @@ import (
 	"blockchain/services/pkg/certificate"
 	"context"
 	"crypto/ecdsa"
+	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/skip2/go-qrcode"
 )
 
 type BlockChainService interface {
-	IssueCertificate(ctx context.Context, req IssueCertificateRequest) error
-	VerifyCertificate(ctx context.Context, certificateId [32]byte) (*VerifyCertificateResponse, error)
-	RevokeCertificate(ctx context.Context, certificateId [32]byte) error
+	// block chain methods
+	IssueCertificate(ctx context.Context, req IssueCertificateRequest) ([]byte, error)
+	VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error)
+	RevokeCertificate(ctx context.Context, pdfHash [32]byte) error
+
+	// other methods
+	GenerateQRCode(content string) ([]byte, error)
 }
 
 type blockChainService struct {
@@ -49,16 +57,24 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository) BlockChain
 	}
 }
 
-func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) error {
-	auth, err := bcc.getAuth()
+func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) ([]byte, error) {
+	auth, err := bcc.getAuth(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// issue on blockchain
 	tx, err := bcc.contract.IssueCertificate(auth, req.PdfHash, req.RecipientName, req.CourseName, req.Grade, req.IssuingAuthority)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	receipt, err := bind.WaitMined(ctx, bcc.client, tx)
+	if err != nil {
+		return nil, err
+	}
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		return nil, errors.New("issue certificate transaction failed")
 	}
 
 	// store in db
@@ -72,19 +88,30 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		BlockchainTxHash: tx.Hash().Hex(),
 		IssuedAt:         time.Now().UTC(),
 	})
-
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	log.Println("tx hash: ", tx.Hash().Hex())
 
-	return nil
+	// generate qr code
+	verifyURL := fmt.Sprintf("http://localhost:8080/certificates/verify/0x%s", common.Bytes2Hex(req.PdfHash[:]))
+	qrCode, err := bcc.GenerateQRCode(verifyURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return qrCode, nil
 }
 
-func (bcc *blockChainService) VerifyCertificate(ctx context.Context, certificateId [32]byte) (*VerifyCertificateResponse, error) {
-	result, err := bcc.contract.VerifyCertificate(&bind.CallOpts{Context: ctx}, certificateId)
+func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error) {
+	result, err := bcc.contract.VerifyCertificate(&bind.CallOpts{Context: ctx}, pdfHash)
 	if err != nil {
+		isValid, validErr := bcc.contract.IsCertificateValid(&bind.CallOpts{Context: ctx}, pdfHash)
+		if validErr == nil && !isValid {
+			return &VerifyCertificateResponse{
+				IsValid: false,
+			}, nil
+		}
 		return nil, err
 	}
 
@@ -98,17 +125,26 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, certificate
 	}, nil
 }
 
-func (bcc *blockChainService) RevokeCertificate(ctx context.Context, certificateId [32]byte) error {
-	auth, err := bcc.getAuth()
+func (bcc *blockChainService) RevokeCertificate(ctx context.Context, pdfHash [32]byte) error {
+	auth, err := bcc.getAuth(ctx)
 	if err != nil {
 		return err
 	}
 
-	tx, err := bcc.contract.RevokeCertificate(
-		auth,
-		certificateId,
-	)
+	tx, err := bcc.contract.RevokeCertificate(auth, pdfHash)
+	if err != nil {
+		return err
+	}
 
+	receipt, err := bind.WaitMined(ctx, bcc.client, tx)
+	if err != nil {
+		return err
+	}
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		return errors.New("revoke certificate transaction failed")
+	}
+
+	err = bcc.repo.RevokeCertificate(ctx, common.Bytes2Hex(pdfHash[:]))
 	if err != nil {
 		return err
 	}
@@ -118,7 +154,7 @@ func (bcc *blockChainService) RevokeCertificate(ctx context.Context, certificate
 	return nil
 }
 
-func (bcc *blockChainService) getAuth() (*bind.TransactOpts, error) {
+func (bcc *blockChainService) getAuth(ctx context.Context) (*bind.TransactOpts, error) {
 	// convert hex private key string into ECDSA private key
 	privateKey, err := crypto.HexToECDSA(bcc.cnf.PrivateKey)
 	if err != nil {
@@ -129,19 +165,22 @@ func (bcc *blockChainService) getAuth() (*bind.TransactOpts, error) {
 	publicKey := privateKey.Public()
 
 	// cast generic public key into ECDSA public key
-	publicKeyECDSA := publicKey.(*ecdsa.PublicKey)
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, errors.New("public key is not ECDSA")
+	}
 
 	// derive ethereum wallet address from public key
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
 	// get next transaction nonce for wallet
-	nonce, err := bcc.client.PendingNonceAt(context.Background(), fromAddress)
+	nonce, err := bcc.client.PendingNonceAt(ctx, fromAddress)
 	if err != nil {
 		return nil, err
 	}
 
 	// fetch suggested gas price from network
-	gasPrice, err := bcc.client.SuggestGasPrice(context.Background())
+	gasPrice, err := bcc.client.SuggestGasPrice(ctx)
 
 	if err != nil {
 		return nil, err
@@ -170,4 +209,12 @@ func (bcc *blockChainService) getAuth() (*bind.TransactOpts, error) {
 	auth.GasPrice = gasPrice
 
 	return auth, nil
+}
+
+func (bcc *blockChainService) GenerateQRCode(content string) ([]byte, error) {
+	return qrcode.Encode(
+		content,
+		qrcode.Medium,
+		256,
+	)
 }

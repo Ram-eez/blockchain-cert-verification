@@ -8,6 +8,7 @@ import (
 
 type ProjectRepository interface {
 	CreateCertificate(ctx context.Context, params CreateCertificateParams) error
+	RevokeCertificate(ctx context.Context, certificateHash string) error
 }
 
 type projectRepository struct {
@@ -25,6 +26,16 @@ func (r *projectRepository) CreateCertificate(ctx context.Context, params Create
 	 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
 	_, err := r.db.Exec(ctx, query, params.InstituteID, params.CertificateHash, params.RecipientName, params.CourseName, params.Grade, params.IssuingAuthority, params.BlockchainTxHash, params.IssuedAt)
+
+	return err
+}
+
+func (r *projectRepository) RevokeCertificate(ctx context.Context, certificateHash string) error {
+	query := `
+		UPDATE certificates SET is_revoked = true, blockchain_status = 'revoked', updated_at = now()
+		WHERE certificate_hash = $1`
+
+	_, err := r.db.Exec(ctx, query, certificateHash)
 
 	return err
 }
