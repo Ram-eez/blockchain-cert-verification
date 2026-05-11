@@ -7,6 +7,7 @@ import (
 	"crypto/ecdsa"
 	"log"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -54,12 +55,28 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		return err
 	}
 
+	// issue on blockchain
 	tx, err := bcc.contract.IssueCertificate(auth, req.PdfHash, req.RecipientName, req.CourseName, req.Grade, req.IssuingAuthority)
 	if err != nil {
 		return err
 	}
 
-	// store later in db as well
+	// store in db
+	err = bcc.repo.CreateCertificate(ctx, CreateCertificateParams{
+		InstituteID:      req.InstituteID,
+		CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
+		RecipientName:    req.RecipientName,
+		CourseName:       req.CourseName,
+		Grade:            req.Grade,
+		IssuingAuthority: req.IssuingAuthority,
+		BlockchainTxHash: tx.Hash().Hex(),
+		IssuedAt:         time.Now().UTC(),
+	})
+
+	if err != nil {
+		return err
+	}
+
 	log.Println("tx hash: ", tx.Hash().Hex())
 
 	return nil

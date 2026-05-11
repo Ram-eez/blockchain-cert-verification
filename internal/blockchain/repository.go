@@ -1,8 +1,13 @@
 package blockchain
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"context"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type ProjectRepository interface {
+	CreateCertificate(ctx context.Context, params CreateCertificateParams) error
 }
 
 type projectRepository struct {
@@ -13,4 +18,13 @@ func NewProjectRepository(db *pgxpool.Pool) ProjectRepository {
 	return &projectRepository{
 		db: db,
 	}
+}
+
+func (r *projectRepository) CreateCertificate(ctx context.Context, params CreateCertificateParams) error {
+	query := `INSERT INTO certificates(institute_id, certificate_hash, recipient_name, course_name, grade, issuing_authority, blockchain_tx_hash, issued_at)
+	 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+
+	_, err := r.db.Exec(ctx, query, params.InstituteID, params.CertificateHash, params.RecipientName, params.CourseName, params.Grade, params.IssuingAuthority, params.BlockchainTxHash, params.IssuedAt)
+
+	return err
 }

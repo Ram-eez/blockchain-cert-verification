@@ -5,6 +5,7 @@ import (
 	"blockchain/internal/config"
 	"blockchain/internal/db"
 	"blockchain/internal/handlers"
+	"blockchain/internal/middleware"
 	"blockchain/internal/server"
 	"context"
 
@@ -28,7 +29,8 @@ func InitializeApplication(cfg *config.Config) (*server.Server, error) {
 		blockchain.NewBlockChainService(cfg, projectRepository)
 
 	// Initialize Handlers
-	projectHandlers := handlers.NewProjectHandler(blockchainService)
+	middleware := middleware.NewMiddleware()
+	projectHandlers := handlers.NewProjectHandler(blockchainService, middleware)
 
 	// Initialize Router
 	router := gin.Default()
