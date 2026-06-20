@@ -63,24 +63,47 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository, jwt middle
 }
 
 func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error) {
+	// create authenticated signer
 	auth, err := bcc.getAuth(ctx)
 	if err != nil {
+		log.Println("failed to get auth:", err)
 		return nil, err
 	}
+
+	log.Println("issuing certificate on blockchain")
+	log.Println("pdf hash:", common.Bytes2Hex(req.PdfHash[:]))
 
 	// issue on blockchain
-	tx, err := bcc.contract.IssueCertificate(auth, req.PdfHash, req.RecipientName, req.CourseName, req.Grade, req.IssuingAuthority)
+	tx, err := bcc.contract.IssueCertificate(
+		auth,
+		req.PdfHash,
+		req.RecipientName,
+		req.CourseName,
+		req.Grade,
+		req.IssuingAuthority,
+	)
 	if err != nil {
+		log.Println("failed to send transaction:", err)
 		return nil, err
 	}
 
+	log.Println("submitted tx:", tx.Hash().Hex())
+
+	// wait for transaction to be mined
 	receipt, err := bind.WaitMined(ctx, bcc.client, tx)
 	if err != nil {
+		log.Println("failed waiting for receipt:", err)
 		return nil, err
 	}
+
+	log.Println("receipt status:", receipt.Status)
+
 	if receipt.Status != types.ReceiptStatusSuccessful {
+		log.Println("transaction reverted")
 		return nil, errors.New("issue certificate transaction failed")
 	}
+
+	log.Println("storing certificate in database")
 
 	// store in db
 	err = bcc.repo.CreateCertificate(ctx, CreateCertificateParams{
@@ -94,16 +117,25 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		IssuedAt:         time.Now().UTC(),
 	})
 	if err != nil {
+		log.Println("failed to store certificate:", err)
 		return nil, err
 	}
-	log.Println("tx hash: ", tx.Hash().Hex())
+
+	log.Println("certificate stored successfully")
 
 	// generate qr code
-	verifyURL := fmt.Sprintf("http://localhost:8080/certificates/verify/0x%s", common.Bytes2Hex(req.PdfHash[:]))
+	verifyURL := fmt.Sprintf(
+		"http://localhost:8080/certificates/verify/%s",
+		common.Bytes2Hex(req.PdfHash[:]),
+	)
+
 	qrCode, err := bcc.GenerateQRCode(verifyURL)
 	if err != nil {
+		log.Println("failed generating qr:", err)
 		return nil, err
 	}
+
+	log.Println("generated qr code")
 
 	return &IssueCertificateResponse{
 		QRCode:           qrCode,

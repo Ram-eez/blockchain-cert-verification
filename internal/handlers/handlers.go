@@ -29,19 +29,24 @@ func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 
 	protected.Use(pH.middleware.AuthorizeJWT)
 
-	public.GET("/certificates/verify/:hash", pH.VerifyCertificateByHash)
-	public.POST("/certificates/verify", pH.VerifyCertificate)
-	protected.POST("/certificates/issue", pH.IssueCertificate)
-	protected.POST("/certificates/revoke", pH.RevokeCertificate)
+	// auth
+	public.GET("/login", pH.LoginPage)
+	public.POST("/login", pH.Login)
+	//public.GET("/logout", pH.Logout)
 
-	// htmx routes
+	// pages
+	public.GET("/", pH.VerifyPage)
 	public.GET("/verify", pH.VerifyPage)
+
 	protected.GET("/issue", pH.IssuePage)
 	protected.GET("/revoke", pH.RevokePage)
 
-	// login routes
-	//public.GET("/login", pH.LoginPage)
-	//public.POST("/login", pH.Login)
+	// certificate apis
+	public.GET("/certificates/verify/:hash", pH.VerifyCertificateByURL)
+	public.POST("/certificates/verify/hash", pH.VerifyCertificateByHash)
+	public.POST("/certificates/verify", pH.VerifyCertificate)
+	protected.POST("/certificates/issue", pH.IssueCertificate)
+	protected.POST("/certificates/revoke", pH.RevokeCertificate)
 
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -109,10 +114,10 @@ func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "failed to open pdf file")
 		return
 	}
-
 	defer file.Close()
 
 	hasher := sha256.New()
+
 	_, err = io.Copy(hasher, file)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "failed to hash pdf")
@@ -121,26 +126,14 @@ func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {
 
 	var pdfHash [32]byte
 	copy(pdfHash[:], hasher.Sum(nil))
-	result, err := pH.services.VerifyCertificate(c.Request.Context(), pdfHash)
-	if err != nil {
-		c.String(http.StatusNotFound, "certificate not found")
-		return
-	}
 
-	if !result.IsValid {
-		c.String(http.StatusOK, "certificate is revoked")
-		return
-	}
-
-	c.String(http.StatusOK, "certificate is valid")
+	pH.verifyHash(c, pdfHash)
 }
 
-func (pH *projectHandlers) VerifyCertificateByHash(c *gin.Context) {
-	hashHex := c.Param("hash")
-	hash := common.HexToHash(hashHex)
+func (pH *projectHandlers) verifyHash(c *gin.Context, pdfHash [32]byte) {
 	result, err := pH.services.VerifyCertificate(
 		c.Request.Context(),
-		hash,
+		pdfHash,
 	)
 
 	if err != nil {
@@ -154,6 +147,28 @@ func (pH *projectHandlers) VerifyCertificateByHash(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "certificate valid")
+}
+
+func (pH *projectHandlers) VerifyCertificateByHash(c *gin.Context) {
+	hashHex := c.PostForm("certificate_hash")
+
+	hash := common.HexToHash(hashHex)
+
+	var pdfHash [32]byte
+	copy(pdfHash[:], hash.Bytes())
+
+	pH.verifyHash(c, pdfHash)
+}
+
+func (pH *projectHandlers) VerifyCertificateByURL(c *gin.Context) {
+	hashHex := c.Param("hash")
+
+	hash := common.HexToHash(hashHex)
+
+	var pdfHash [32]byte
+	copy(pdfHash[:], hash.Bytes())
+
+	pH.verifyHash(c, pdfHash)
 }
 
 func (pH *projectHandlers) RevokeCertificate(c *gin.Context) {
@@ -186,4 +201,33 @@ func (pH *projectHandlers) VerifyPage(c *gin.Context) {
 
 func (pH *projectHandlers) RevokePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "revoke.html", nil)
+}
+func (pH *projectHandlers) LoginPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "login.html", nil)
+}
+
+func (pH *projectHandlers) Login(c *gin.Context) {
+	req := blockchain.LoginRequest{
+		Email:    c.PostForm("email"),
+		Password: c.PostForm("password"),
+	}
+
+	token, err := pH.services.Login(c.Request.Context(), req)
+	if err != nil {
+		c.String(http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+
+	c.SetCookie(
+		"token",
+		token,
+		86400,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	c.Header("HX-Redirect", "/issue")
+	c.String(http.StatusOK, "")
 }

@@ -12,6 +12,8 @@
 
 <h1>Verify Certificate</h1>
 
+<h3>Verify by PDF</h3>
+
 <form
     hx-post="/certificates/verify"
     hx-target="#result"
@@ -22,8 +24,28 @@
         name="pdf"
         required>
 
-    <button type="submit">
-        Verify Certificate
+    <button>
+        Verify PDF
+    </button>
+
+</form>
+
+<hr>
+
+<h3>Verify by Hash</h3>
+
+<form
+    hx-post="/certificates/verify/hash"
+    hx-target="#result">
+
+    <input
+        type="text"
+        name="certificate_hash"
+        placeholder="Certificate Hash"
+        required>
+
+    <button>
+        Verify Hash
     </button>
 
 </form>

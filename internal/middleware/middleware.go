@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"blockchain/internal/config"
+	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -27,38 +27,54 @@ func NewMiddleware(cnf *config.Config) Middleware {
 }
 
 func (m *middleware) AuthorizeJWT(c *gin.Context) {
-
-	authHeader := c.GetHeader("Authorization")
-
-	if authHeader == "" {
+	token, err := c.Cookie("token")
+	if err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusUnauthorized,
-			gin.H{"error": "missing authorization header"},
+			gin.H{"error": "missing token"},
 		)
 		return
 	}
 
-	token := strings.TrimPrefix(
-		authHeader,
-		"Bearer ",
-	)
-
-	if token == "" {
+	instituteID, err := m.ValidateJWT(token)
+	if err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusUnauthorized,
-			gin.H{
-				"error": "invalid token",
-			},
+			gin.H{"error": "invalid token"},
 		)
 		return
 	}
 
-	// TODO:
-	// validate JWT properly later
-
-	c.Set("institute_id", "temp-institute-id")
+	c.Set("institute_id", instituteID)
 
 	c.Next()
+}
+
+func (m *middleware) ValidateJWT(tokenString string) (uuid.UUID, error) {
+	claims := jwt.MapClaims{}
+
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		claims,
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(m.cnf.Secret), nil
+		},
+	)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if !token.Valid {
+		return uuid.Nil, errors.New("invalid token")
+	}
+
+	instituteID, err := uuid.Parse(claims["institute_id"].(string))
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return instituteID, nil
 }
 
 func (m *middleware) GenerateJWT(instituteID uuid.UUID) (string, error) {
