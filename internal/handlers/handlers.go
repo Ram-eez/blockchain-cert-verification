@@ -47,6 +47,7 @@ func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 	public.POST("/certificates/verify", pH.VerifyCertificate)
 	protected.POST("/certificates/issue", pH.IssueCertificate)
 	protected.POST("/certificates/revoke", pH.RevokeCertificate)
+	protected.POST("/certificates/revoke/hash", pH.RevokeCertificateByHash)
 
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -171,23 +172,102 @@ func (pH *projectHandlers) VerifyCertificateByURL(c *gin.Context) {
 	pH.verifyHash(c, pdfHash)
 }
 
+func (pH *projectHandlers) revokeHash(c *gin.Context, pdfHash [32]byte) {
+	err := pH.services.RevokeCertificate(
+		c.Request.Context(),
+		pdfHash,
+	)
+
+	if err != nil {
+		c.String(
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+		return
+	}
+
+	c.String(
+		http.StatusOK,
+		"certificate revoked successfully",
+	)
+
+}
+
 func (pH *projectHandlers) RevokeCertificate(c *gin.Context) {
+	pdfFile, err := c.FormFile("pdf")
+	if err != nil {
+		c.String(http.StatusBadRequest, "pdf file is required")
+		return
+	}
+
+	file, err := pdfFile.Open()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "failed to open pdf file")
+		return
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+
+	_, err = io.Copy(hasher, file)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "failed to hash pdf")
+		return
+	}
+
+	var pdfHash [32]byte
+	copy(pdfHash[:], hasher.Sum(nil))
+
+	err = pH.services.RevokeCertificate(
+		c.Request.Context(),
+		pdfHash,
+	)
+	if err != nil {
+		c.String(
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+		return
+	}
+
+	c.String(
+		http.StatusOK,
+		"certificate revoked successfully",
+	)
+}
+
+func (pH *projectHandlers) RevokeCertificateByHash(c *gin.Context) {
 	hashHex := c.PostForm("certificate_hash")
 
 	if hashHex == "" {
-		c.String(http.StatusBadRequest, "certificate hash is required")
+		c.String(
+			http.StatusBadRequest,
+			"certificate hash is required",
+		)
 		return
 	}
 
-	certificateHash := common.HexToHash(hashHex)
+	hash := common.HexToHash(hashHex)
 
-	err := pH.services.RevokeCertificate(c.Request.Context(), certificateHash)
+	var pdfHash [32]byte
+	copy(pdfHash[:], hash.Bytes())
+
+	err := pH.services.RevokeCertificate(
+		c.Request.Context(),
+		pdfHash,
+	)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		c.String(
+			http.StatusInternalServerError,
+			err.Error(),
+		)
 		return
 	}
 
-	c.String(http.StatusOK, "certificate revoked successfully")
+	c.String(
+		http.StatusOK,
+		"certificate revoked successfully",
+	)
 }
 
 // HTMX Pages and Endpoints

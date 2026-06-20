@@ -12,8 +12,30 @@
 
 <h1>Revoke Certificate</h1>
 
+<h3>Revoke by PDF</h3>
+
 <form
     hx-post="/certificates/revoke"
+    hx-target="#result"
+    hx-encoding="multipart/form-data">
+
+    <input
+        type="file"
+        name="pdf"
+        required>
+
+    <button type="submit">
+        Revoke PDF
+    </button>
+
+</form>
+
+<hr>
+
+<h3>Revoke by Hash</h3>
+
+<form
+    hx-post="/certificates/revoke/hash"
     hx-target="#result">
 
     <input
@@ -23,7 +45,7 @@
         required>
 
     <button type="submit">
-        Revoke Certificate
+        Revoke Hash
     </button>
 
 </form>
