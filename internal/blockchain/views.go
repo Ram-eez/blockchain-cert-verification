@@ -1,6 +1,10 @@
 package blockchain
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type IssueCertificateRequest struct {
 	InstituteID      uuid.UUID
@@ -9,6 +13,17 @@ type IssueCertificateRequest struct {
 	CourseName       string
 	Grade            string
 	IssuingAuthority string
+}
+
+type IssueCertificateResponse struct {
+	QRCode           []byte
+	VerifyURL        string
+	CertificateHash  string
+	BlockchainTxHash string
+	RecipientName    string
+	CourseName       string
+	Grade            string
+	IssuedAt         time.Time
 }
 
 type VerifyCertificateResponse struct {

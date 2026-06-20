@@ -21,7 +21,7 @@ import (
 
 type BlockChainService interface {
 	// block chain methods
-	IssueCertificate(ctx context.Context, req IssueCertificateRequest) ([]byte, error)
+	IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error)
 	VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error)
 	RevokeCertificate(ctx context.Context, pdfHash [32]byte) error
 
@@ -57,7 +57,7 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository) BlockChain
 	}
 }
 
-func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) ([]byte, error) {
+func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error) {
 	auth, err := bcc.getAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,16 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		return nil, err
 	}
 
-	return qrCode, nil
+	return &IssueCertificateResponse{
+		QRCode:           qrCode,
+		VerifyURL:        verifyURL,
+		CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
+		BlockchainTxHash: tx.Hash().Hex(),
+		RecipientName:    req.RecipientName,
+		CourseName:       req.CourseName,
+		Grade:            req.Grade,
+		IssuedAt:         time.Now().UTC(),
+	}, nil
 }
 
 func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error) {

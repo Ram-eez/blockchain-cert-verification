@@ -81,7 +81,7 @@ func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
 		return
 	}
 
-	c.Data(http.StatusOK, "image/png", qrCode)
+	c.Data(http.StatusOK, "image/png", qrCode.QRCode)
 }
 
 func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {
