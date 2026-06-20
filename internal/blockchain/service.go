@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"blockchain/internal/config"
+	"blockchain/internal/middleware"
 	"blockchain/services/pkg/certificate"
 	"context"
 	"crypto/ecdsa"
@@ -17,6 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/skip2/go-qrcode"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type BlockChainService interface {
@@ -27,6 +29,7 @@ type BlockChainService interface {
 
 	// other methods
 	GenerateQRCode(content string) ([]byte, error)
+	Login(ctx context.Context, req LoginRequest) (string, error)
 }
 
 type blockChainService struct {
@@ -34,9 +37,10 @@ type blockChainService struct {
 	client   *ethclient.Client
 	contract *certificate.Certificate
 	repo     ProjectRepository
+	jwt      middleware.Middleware
 }
 
-func NewBlockChainService(cnf *config.Config, repo ProjectRepository) BlockChainService {
+func NewBlockChainService(cnf *config.Config, repo ProjectRepository, jwt middleware.Middleware) BlockChainService {
 	client, err := ethclient.Dial(cnf.SepoliaRPCURL)
 	if err != nil {
 		log.Fatal(err)
@@ -54,6 +58,7 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository) BlockChain
 		client:   client,
 		contract: contractInstance,
 		repo:     repo,
+		jwt:      jwt,
 	}
 }
 
@@ -226,4 +231,23 @@ func (bcc *blockChainService) GenerateQRCode(content string) ([]byte, error) {
 		qrcode.Medium,
 		256,
 	)
+}
+
+func (bcc *blockChainService) Login(ctx context.Context, req LoginRequest) (string, error) {
+	institute, err := bcc.repo.GetInstituteByEmail(ctx, req.Email)
+	if err != nil {
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(institute.PasswordHash), []byte(req.Password))
+	if err != nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	token, err := bcc.jwt.GenerateJWT(institute.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

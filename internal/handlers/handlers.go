@@ -32,7 +32,16 @@ func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 	public.GET("/certificates/verify/:hash", pH.VerifyCertificateByHash)
 	public.POST("/certificates/verify", pH.VerifyCertificate)
 	protected.POST("/certificates/issue", pH.IssueCertificate)
-	protected.POST("/certificates/rewoke", pH.RevokeCertificate)
+	protected.POST("/certificates/revoke", pH.RevokeCertificate)
+
+	// htmx routes
+	public.GET("/verify", pH.VerifyPage)
+	protected.GET("/issue", pH.IssuePage)
+	protected.GET("/revoke", pH.RevokePage)
+
+	// login routes
+	//public.GET("/login", pH.LoginPage)
+	//public.POST("/login", pH.Login)
 
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -72,7 +81,7 @@ func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
 		IssuingAuthority: c.PostForm("issuing_authority"),
 	}
 
-	qrCode, err := pH.services.IssueCertificate(c.Request.Context(), req)
+	_, err = pH.services.IssueCertificate(c.Request.Context(), req)
 	if err != nil {
 		c.String(
 			http.StatusInternalServerError,
@@ -81,7 +90,11 @@ func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
 		return
 	}
 
-	c.Data(http.StatusOK, "image/png", qrCode.QRCode)
+	// c.Data(http.StatusOK, "image/png", qrCode.QRCode)
+	c.String(
+		http.StatusOK,
+		"Certificate issued successfully",
+	)
 }
 
 func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {
@@ -160,4 +173,17 @@ func (pH *projectHandlers) RevokeCertificate(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "certificate revoked successfully")
+}
+
+// HTMX Pages and Endpoints
+func (pH *projectHandlers) IssuePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "issue.html", nil)
+}
+
+func (pH *projectHandlers) VerifyPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "verify.html", nil)
+}
+
+func (pH *projectHandlers) RevokePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "revoke.html", nil)
 }

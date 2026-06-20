@@ -1,21 +1,29 @@
 package middleware
 
 import (
+	"blockchain/internal/config"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type Middleware interface {
 	AuthorizeJWT(c *gin.Context)
+	GenerateJWT(instituteID uuid.UUID) (string, error)
 }
 
 type middleware struct {
+	cnf *config.Config
 }
 
-func NewMiddleware() Middleware {
-	return &middleware{}
+func NewMiddleware(cnf *config.Config) Middleware {
+	return &middleware{
+		cnf: cnf,
+	}
 }
 
 func (m *middleware) AuthorizeJWT(c *gin.Context) {
@@ -51,4 +59,15 @@ func (m *middleware) AuthorizeJWT(c *gin.Context) {
 	c.Set("institute_id", "temp-institute-id")
 
 	c.Next()
+}
+
+func (m *middleware) GenerateJWT(instituteID uuid.UUID) (string, error) {
+	claims := jwt.MapClaims{
+		"institute_id": instituteID.String(),
+		"exp":          time.Now().Add(24 * time.Hour).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString([]byte(m.cnf.Secret))
 }

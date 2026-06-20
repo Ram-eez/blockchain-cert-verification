@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Revoke Certificate</title>
+
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+
+<body>
+
+<h1>Revoke Certificate</h1>
+
+<form
+    hx-post="/certificates/revoke"
+    hx-target="#result">
+
+    <input
+        type="text"
+        name="certificate_hash"
+        placeholder="Certificate Hash"
+        required>
+
+    <button type="submit">
+        Revoke Certificate
+    </button>
+
+</form>
+
+<hr>
+
+<div id="result"></div>
+
+</body>
+</html>

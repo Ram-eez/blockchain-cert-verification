@@ -24,16 +24,21 @@ func InitializeApplication(cfg *config.Config) (*server.Server, error) {
 	projectRepository :=
 		blockchain.NewProjectRepository(pool)
 
+		// Initialize JWT
+	jwt := middleware.NewMiddleware(cfg)
+
 	// Initialize Blockchain Service
 	blockchainService :=
-		blockchain.NewBlockChainService(cfg, projectRepository)
+		blockchain.NewBlockChainService(cfg, projectRepository, jwt)
 
 	// Initialize Handlers
-	middleware := middleware.NewMiddleware()
-	projectHandlers := handlers.NewProjectHandler(blockchainService, middleware)
+	projectHandlers := handlers.NewProjectHandler(blockchainService, jwt)
 
 	// Initialize Router
 	router := gin.Default()
+
+	// Load HTML templates
+	router.LoadHTMLGlob("templates/*")
 
 	// Mount Routes
 	projectHandlers.MountRoutes(router)

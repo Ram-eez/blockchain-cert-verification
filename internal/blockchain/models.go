@@ -32,3 +32,13 @@ type CreateCertificateParams struct {
 	BlockchainTxHash string
 	IssuedAt         time.Time
 }
+
+type Institute struct {
+	ID           uuid.UUID `db:"id"`
+	Name         string    `db:"name"`
+	Email        string    `db:"email"`
+	PasswordHash string    `db:"password_hash"`
+	IsActive     bool      `db:"is_active"`
+	CreatedAt    time.Time `db:"created_at"`
+	UpdatedAt    time.Time `db:"updated_at"`
+}

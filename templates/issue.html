@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Issue Certificate</title>
+
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+
+<body>
+
+    <h1>Issue Certificate</h1>
+
+    <form
+        hx-post="/certificates/issue"
+        hx-target="#result"
+        hx-encoding="multipart/form-data">
+
+        <div>
+            <label>Certificate PDF</label><br>
+            <input type="file" name="pdf" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Recipient Name</label><br>
+            <input type="text" name="recipient_name" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Course Name</label><br>
+            <input type="text" name="course_name" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Grade</label><br>
+            <input type="text" name="grade" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Issuing Authority</label><br>
+            <input type="text" name="issuing_authority" required>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Issue Certificate
+        </button>
+
+    </form>
+
+    <hr>
+
+    <div id="result"></div>
+
+</body>
+
+</html>

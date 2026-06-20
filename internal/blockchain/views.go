@@ -34,3 +34,8 @@ type VerifyCertificateResponse struct {
 	IssueDate        uint64
 	IsValid          bool
 }
+
+type LoginRequest struct {
+	Email    string
+	Password string
+}

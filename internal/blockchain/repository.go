@@ -9,6 +9,7 @@ import (
 type ProjectRepository interface {
 	CreateCertificate(ctx context.Context, params CreateCertificateParams) error
 	RevokeCertificate(ctx context.Context, certificateHash string) error
+	GetInstituteByEmail(ctx context.Context, email string) (*Institute, error)
 }
 
 type projectRepository struct {
@@ -38,4 +39,22 @@ func (r *projectRepository) RevokeCertificate(ctx context.Context, certificateHa
 	_, err := r.db.Exec(ctx, query, certificateHash)
 
 	return err
+}
+
+func (r *projectRepository) GetInstituteByEmail(ctx context.Context, email string) (*Institute, error) {
+	query := `SELECT id,name,email,password_hash,is_active,created_at,updated_at FROM institutes WHERE email=$1`
+
+	var institute Institute
+
+	err := r.db.QueryRow(ctx, query, email).Scan(
+		&institute.ID,
+		&institute.Name,
+		&institute.Email,
+		&institute.PasswordHash,
+		&institute.IsActive,
+		&institute.CreatedAt,
+		&institute.UpdatedAt,
+	)
+
+	return &institute, err
 }
