@@ -21,8 +21,11 @@ type Config struct {
 	PgDatabaseName string
 	PgSSLMode      string
 
-	//jwt
+	// jwt
 	Secret string
+
+	// project
+	BaseURL string
 }
 
 func LoadConfig() *Config {
@@ -47,8 +50,11 @@ func LoadConfig() *Config {
 		PgDatabaseName: mustEnv("PG_DATABASE_NAME"),
 		PgSSLMode:      mustEnv("PG_SSL_MODE"),
 
-		//jwt
+		// jwt
 		Secret: mustEnv("JWT_SECRET"),
+
+		// project
+		BaseURL: mustEnv("BASE_URL"),
 	}
 
 	return cfg

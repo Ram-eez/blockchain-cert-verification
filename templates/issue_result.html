@@ -1,0 +1,47 @@
+<h2>Certificate Issued Successfully</h2>
+
+<p><b>Recipient:</b> {{ .RecipientName }}</p>
+
+<p><b>Course:</b> {{ .CourseName }}</p>
+
+<p><b>Grade:</b> {{ .Grade }}</p>
+
+<p><b>Issued By:</b> {{ .IssuingAuthority }}</p>
+
+<p><b>Issued At:</b> {{ .IssuedAt }}</p>
+
+<p><b>Certificate Hash:</b></p>
+<pre>{{ .CertificateHash }}</pre>
+
+<p><b>Blockchain Transaction Hash:</b></p>
+<pre>{{ .BlockchainTxHash }}</pre>
+
+<p><b>Verification URL:</b></p>
+<p>
+    <a href="{{ .VerifyURL }}" target="_blank">
+        {{ .VerifyURL }}
+    </a>
+</p>
+
+<p><b>Transaction URL:</b></p>
+<p>
+    <a href="{{ .TransactionURL }}" target="_blank">
+        View on Etherscan
+    </a>
+</p>
+
+<p><b>QR Code:</b></p>
+
+<img
+    src="data:image/png;base64,{{ .QRCodeBase64 }}"
+    alt="Certificate QR Code"
+    width="250">
+
+<br>
+<br>
+
+<p>
+    <a href="/issue">
+        Issue Another Certificate
+    </a>
+</p>

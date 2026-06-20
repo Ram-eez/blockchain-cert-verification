@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type projectHandlers struct {
@@ -66,11 +67,11 @@ func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "failed to open pdf file")
 		return
 	}
-
 	defer file.Close()
 
 	// hash certificate
 	hasher := sha256.New()
+
 	_, err = io.Copy(hasher, file)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "failed to hash pdf")
@@ -79,28 +80,35 @@ func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
 
 	var pdfHash [32]byte
 	copy(pdfHash[:], hasher.Sum(nil))
+
+	instituteID, ok := c.Get("institute_id")
+	if !ok {
+		c.String(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	instituteName, ok := c.Get("institute_name")
+	if !ok {
+		c.String(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	req := blockchain.IssueCertificateRequest{
+		InstituteID:      instituteID.(uuid.UUID),
+		IssuingAuthority: instituteName.(string),
 		PdfHash:          pdfHash,
 		RecipientName:    c.PostForm("recipient_name"),
 		CourseName:       c.PostForm("course_name"),
 		Grade:            c.PostForm("grade"),
-		IssuingAuthority: c.PostForm("issuing_authority"),
 	}
 
-	_, err = pH.services.IssueCertificate(c.Request.Context(), req)
+	resp, err := pH.services.IssueCertificate(c.Request.Context(), req)
 	if err != nil {
-		c.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// c.Data(http.StatusOK, "image/png", qrCode.QRCode)
-	c.String(
-		http.StatusOK,
-		"Certificate issued successfully",
-	)
+	c.HTML(http.StatusOK, "issue_result.html", resp)
 }
 
 func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {

@@ -6,10 +6,12 @@ import (
 	"blockchain/services/pkg/certificate"
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -63,6 +65,26 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository, jwt middle
 }
 
 func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error) {
+	// check if certificate already exists
+	result, err := bcc.VerifyCertificate(ctx, req.PdfHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.Exists {
+		if result.IsValid {
+			return nil,
+				errors.New(
+					"certificate already issued",
+				)
+		}
+
+		return nil,
+			errors.New(
+				"certificate was revoked; issue a corrected certificate with a different pdf",
+			)
+	}
+
 	// create authenticated signer
 	auth, err := bcc.getAuth(ctx)
 	if err != nil {
@@ -90,7 +112,11 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 	log.Println("submitted tx:", tx.Hash().Hex())
 
 	// wait for transaction to be mined
-	receipt, err := bind.WaitMined(ctx, bcc.client, tx)
+	receipt, err := bind.WaitMined(
+		ctx,
+		bcc.client,
+		tx,
+	)
 	if err != nil {
 		log.Println("failed waiting for receipt:", err)
 		return nil, err
@@ -100,22 +126,30 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	if receipt.Status != types.ReceiptStatusSuccessful {
 		log.Println("transaction reverted")
-		return nil, errors.New("issue certificate transaction failed")
+
+		return nil,
+			errors.New(
+				"issue certificate transaction failed",
+			)
 	}
 
 	log.Println("storing certificate in database")
 
+	issuedAt := time.Now()
 	// store in db
-	err = bcc.repo.CreateCertificate(ctx, CreateCertificateParams{
-		InstituteID:      req.InstituteID,
-		CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
-		RecipientName:    req.RecipientName,
-		CourseName:       req.CourseName,
-		Grade:            req.Grade,
-		IssuingAuthority: req.IssuingAuthority,
-		BlockchainTxHash: tx.Hash().Hex(),
-		IssuedAt:         time.Now().UTC(),
-	})
+	err = bcc.repo.CreateCertificate(
+		ctx,
+		CreateCertificateParams{
+			InstituteID:      req.InstituteID,
+			CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
+			RecipientName:    req.RecipientName,
+			CourseName:       req.CourseName,
+			Grade:            req.Grade,
+			IssuingAuthority: req.IssuingAuthority,
+			BlockchainTxHash: tx.Hash().Hex(),
+			IssuedAt:         issuedAt,
+		},
+	)
 	if err != nil {
 		log.Println("failed to store certificate:", err)
 		return nil, err
@@ -125,11 +159,14 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	// generate qr code
 	verifyURL := fmt.Sprintf(
-		"http://localhost:8080/certificates/verify/%s",
+		"%s/certificates/verify/%s",
+		strings.TrimRight(bcc.cnf.BaseURL, "/"),
 		common.Bytes2Hex(req.PdfHash[:]),
 	)
 
-	qrCode, err := bcc.GenerateQRCode(verifyURL)
+	qrCode, err := bcc.GenerateQRCode(
+		verifyURL,
+	)
 	if err != nil {
 		log.Println("failed generating qr:", err)
 		return nil, err
@@ -137,27 +174,37 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	log.Println("generated qr code")
 
+	txURL := fmt.Sprintf(
+		"https://sepolia.etherscan.io/tx/%s",
+		tx.Hash().Hex(),
+	)
+
 	return &IssueCertificateResponse{
-		QRCode:           qrCode,
+		QRCodeBase64:     base64.StdEncoding.EncodeToString(qrCode),
 		VerifyURL:        verifyURL,
 		CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
 		BlockchainTxHash: tx.Hash().Hex(),
+		TransactionURL:   txURL,
 		RecipientName:    req.RecipientName,
 		CourseName:       req.CourseName,
 		Grade:            req.Grade,
-		IssuedAt:         time.Now().UTC(),
+		IssuedAt:         issuedAt,
+		IssuingAuthority: req.IssuingAuthority,
 	}, nil
 }
 
 func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error) {
 	result, err := bcc.contract.VerifyCertificate(&bind.CallOpts{Context: ctx}, pdfHash)
+
 	if err != nil {
 		isValid, validErr := bcc.contract.IsCertificateValid(&bind.CallOpts{Context: ctx}, pdfHash)
 		if validErr == nil && !isValid {
 			return &VerifyCertificateResponse{
 				IsValid: false,
+				Exists:  false,
 			}, nil
 		}
+
 		return nil, err
 	}
 
@@ -168,6 +215,7 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32
 		IssuingAuthority: result.IssuingAuthority,
 		IssueDate:        result.IssueDate.Uint64(),
 		IsValid:          result.IsValid,
+		Exists:           true,
 	}, nil
 }
 

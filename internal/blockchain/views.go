@@ -16,14 +16,16 @@ type IssueCertificateRequest struct {
 }
 
 type IssueCertificateResponse struct {
-	QRCode           []byte
+	QRCodeBase64     string
 	VerifyURL        string
 	CertificateHash  string
 	BlockchainTxHash string
+	TransactionURL   string
 	RecipientName    string
 	CourseName       string
 	Grade            string
 	IssuedAt         time.Time
+	IssuingAuthority string
 }
 
 type VerifyCertificateResponse struct {
@@ -33,6 +35,7 @@ type VerifyCertificateResponse struct {
 	IssuingAuthority string
 	IssueDate        uint64
 	IsValid          bool
+	Exists           bool
 }
 
 type LoginRequest struct {
