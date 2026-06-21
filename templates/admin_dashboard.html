@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Dashboard</title>
+
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    {{ template "theme_assets" . }}
+</head>
+
+<body>
+
+<main class="page-shell">
+
+<header class="page-header">
+
+    <p class="eyebrow">
+        Administration
+    </p>
+
+    <h1>
+        Admin Dashboard
+    </h1>
+
+    <p>
+        Create new institutions and generate login credentials.
+    </p>
+
+</header>
+
+
+<section class="panel">
+
+    <div class="panel-stack">
+
+        <div>
+
+            <h3>
+                Create Institution
+            </h3>
+
+            <p class="panel-subtitle">
+                Generate credentials for an institution.
+            </p>
+
+        </div>
+
+
+        <form
+            hx-post="/admin/institutions"
+            hx-target="#result"
+            hx-swap="innerHTML">
+
+            <div class="field">
+
+                <label>
+                    Institution Name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Massachusetts Institute of Technology"
+                    required>
+
+            </div>
+
+            <div class="field">
+
+                <label>
+                    Institution Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="admin@mit.edu"
+                    required>
+
+            </div>
+
+
+            <button type="submit">
+
+                Generate Credentials
+
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<div id="result"></div>
+
+</main>
+
+{{ template "reset_forms_script" . }}
+
+</body>
+</html>

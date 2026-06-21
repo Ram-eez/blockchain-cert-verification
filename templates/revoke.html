@@ -11,6 +11,12 @@
         <p class="eyebrow">Certificate Administration</p>
         <h1>Revoke Certificate</h1>
         <p>Withdraw a certificate from verification records when it has been issued in error or must no longer remain valid.</p>
+
+        <div class="workspace-nav">
+            <a class="workspace-nav__link" href="/issue">Issue</a>
+            <a class="workspace-nav__link" href="/verify">Verify</a>
+            <a class="workspace-nav__link workspace-nav__link--active" href="/revoke">Revoke</a>
+        </div>
     </header>
 
     <section class="panel-grid">
@@ -22,8 +28,10 @@
                 </div>
 
                 <form
+                    id="revoke-pdf-form"
                     hx-post="/certificates/revoke"
                     hx-target="#result"
+                    hx-swap="innerHTML"
                     hx-encoding="multipart/form-data"
                     autocomplete="off">
 
@@ -52,8 +60,10 @@
                 </div>
 
                 <form
+                    id="revoke-hash-form"
                     hx-post="/certificates/revoke/hash"
                     hx-target="#result"
+                    hx-swap="innerHTML"
                     autocomplete="off">
 
                     <div class="field">
@@ -77,6 +87,104 @@
 
     <div id="result"></div>
 </main>
+
+<div id="revoke-loading-overlay" class="overlay" hidden>
+<div class="overlay-card">
+<div class="spinner" aria-hidden="true"></div>
+<h2>Revoking Certificate</h2>
+<p>The certificate is being revoked on the blockchain. Please wait and do not refresh this page.</p>
+</div>
+</div>
+
+<div id="revoke-error-overlay" class="overlay" hidden>
+<div class="overlay-card">
+<h2>Revoke Failed</h2>
+<p id="revoke-error-message">Something went wrong while revoking the certificate.</p>
+<div class="overlay-actions">
+<button type="button" id="revoke-error-close">Close</button>
+</div>
+</div>
+</div>
+
 {{ template "reset_forms_script" . }}
+<script>
+  (function () {
+    var forms = [
+      document.getElementById("revoke-pdf-form"),
+      document.getElementById("revoke-hash-form")
+    ].filter(Boolean);
+    var loading = document.getElementById("revoke-loading-overlay");
+    var errorOverlay = document.getElementById("revoke-error-overlay");
+    var errorMessage = document.getElementById("revoke-error-message");
+    var errorClose = document.getElementById("revoke-error-close");
+
+    if (!forms.length || !loading || !errorOverlay || !errorMessage || !errorClose) {
+      return;
+    }
+
+    function isManagedForm(element) {
+      return forms.indexOf(element) !== -1;
+    }
+
+    function showLoading() {
+      loading.hidden = false;
+    }
+
+    function hideLoading() {
+      loading.hidden = true;
+    }
+
+    function hideError() {
+      errorOverlay.hidden = true;
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message || "Something went wrong while revoking the certificate.";
+      errorOverlay.hidden = false;
+    }
+
+    errorClose.addEventListener("click", hideError);
+    errorOverlay.addEventListener("click", function (event) {
+      if (event.target === errorOverlay) {
+        hideError();
+      }
+    });
+
+    document.body.addEventListener("htmx:beforeRequest", function (event) {
+      if (!isManagedForm(event.detail.elt)) {
+        return;
+      }
+
+      hideError();
+      showLoading();
+    });
+
+    document.body.addEventListener("htmx:afterRequest", function (event) {
+      if (!isManagedForm(event.detail.elt)) {
+        return;
+      }
+
+      hideLoading();
+    });
+
+    document.body.addEventListener("htmx:responseError", function (event) {
+      if (!isManagedForm(event.detail.elt)) {
+        return;
+      }
+
+      hideLoading();
+      showError(event.detail.xhr.responseText);
+    });
+
+    document.body.addEventListener("htmx:sendError", function (event) {
+      if (!isManagedForm(event.detail.elt)) {
+        return;
+      }
+
+      hideLoading();
+      showError("Network error. Please try again.");
+    });
+  })();
+</script>
 </body>
 </html>

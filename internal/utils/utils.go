@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
+	"math/big"
 
 	"github.com/jung-kurt/gofpdf"
 )
@@ -396,4 +398,21 @@ func GenerateCertificateCard(req CertificateCard) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func GeneratePassword(length int) string {
+	const chars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+	password := make([]byte, length)
+
+	for i := range password {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		if err != nil {
+			panic(err)
+		}
+
+		password[i] = chars[n.Int64()]
+	}
+
+	return string(password)
 }

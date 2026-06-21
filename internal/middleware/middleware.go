@@ -12,9 +12,14 @@ import (
 )
 
 type Middleware interface {
+	// Institute
 	AuthorizeJWT(c *gin.Context)
 	GenerateJWT(instituteID uuid.UUID, instituteName string) (string, error)
+	GenerateAdminJWT() (string, error)
+	// ADMIN
+	AuthorizeAdmin(c *gin.Context)
 	ValidateJWT(tokenString string) (uuid.UUID, string, error)
+	ValidateAdminJWT(tokenString string) error
 }
 
 type middleware struct {
@@ -96,4 +101,54 @@ func (m *middleware) GenerateJWT(instituteID uuid.UUID, instituteName string) (s
 	)
 
 	return token.SignedString([]byte(m.cnf.Secret))
+}
+
+func (m *middleware) GenerateAdminJWT() (string, error) {
+	claims := jwt.MapClaims{
+		"is_admin": true,
+		"exp":      time.Now().Add(24 * time.Hour).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString([]byte(m.cnf.Secret))
+}
+
+func (m *middleware) ValidateAdminJWT(tokenString string) error {
+	claims := jwt.MapClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(m.cnf.Secret), nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !token.Valid {
+		return errors.New("invalid token")
+	}
+
+	isAdmin, ok := claims["is_admin"].(bool)
+	if !ok || !isAdmin {
+		return errors.New("not admin")
+	}
+
+	return nil
+}
+
+func (m *middleware) AuthorizeAdmin(c *gin.Context) {
+	token, err := c.Cookie("admin_token")
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing admin token"})
+		return
+	}
+
+	err = m.ValidateAdminJWT(token)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid admin token"})
+		return
+	}
+
+	c.Next()
 }

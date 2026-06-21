@@ -26,6 +26,10 @@ type Config struct {
 
 	// project
 	BaseURL string
+
+	// ADMIN
+	AdminUsername string
+	AdminPassword string
 }
 
 func LoadConfig() *Config {
@@ -55,6 +59,10 @@ func LoadConfig() *Config {
 
 		// project
 		BaseURL: mustEnv("BASE_URL"),
+
+		// ADMIN
+		AdminUsername: mustEnv("ADMIN_USERNAME"),
+		AdminPassword: mustEnv("ADMIN_PASSWORD"),
 	}
 
 	return cfg

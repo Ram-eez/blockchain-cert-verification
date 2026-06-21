@@ -1,0 +1,24 @@
+<section class="panel result-fragment institution-result">
+<div class="institution-result__hero">
+<span class="institution-result__pill">Institution Created</span>
+<h2 class="institution-result__title">Credentials are ready</h2>
+<p class="institution-result__subtitle">Share these details with the institution admin and store the password somewhere safe.</p>
+</div>
+
+<div class="institution-result__card">
+<div class="institution-result__row">
+<span class="institution-result__label">Institution: </span>
+<strong class="institution-result__value">{{ .Name }}</strong>
+</div>
+
+<div class="institution-result__row">
+<span class="institution-result__label">Login Email: </span>
+<code class="institution-result__code">{{ .Email }}</code>
+</div>
+
+<div class="institution-result__row institution-result__row--password">
+<span class="institution-result__label">Generated Password: </span>
+<code class="institution-result__secret">{{ .Password }}</code>
+</div>
+</div>
+</section>

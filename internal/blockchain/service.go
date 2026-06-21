@@ -21,8 +21,14 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	ErrCertificateNotFound       = errors.New("certificate does not exist")
+	ErrCertificateAlreadyRevoked = errors.New("certificate already revoked")
 )
 
 type BlockChainService interface {
@@ -34,6 +40,7 @@ type BlockChainService interface {
 	// other methods
 	GenerateQRCode(content string) ([]byte, error)
 	Login(ctx context.Context, req LoginRequest) (string, error)
+	CreateInstitution(ctx context.Context, req CreateInstitutionRequest) (*CreateInstitutionResponse, error)
 }
 
 type blockChainService struct {
@@ -304,6 +311,17 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32
 }
 
 func (bcc *blockChainService) RevokeCertificate(ctx context.Context, pdfHash [32]byte) error {
+	certificateHash := common.Bytes2Hex(pdfHash[:])
+
+	cert, err := bcc.repo.GetCertificateByHash(ctx, certificateHash)
+	if err != nil {
+		return ErrCertificateNotFound
+	}
+
+	if cert.IsRevoked {
+		return ErrCertificateAlreadyRevoked
+	}
+
 	auth, err := bcc.getAuth(ctx)
 	if err != nil {
 		return err
@@ -322,7 +340,7 @@ func (bcc *blockChainService) RevokeCertificate(ctx context.Context, pdfHash [32
 		return errors.New("revoke certificate transaction failed")
 	}
 
-	err = bcc.repo.RevokeCertificate(ctx, common.Bytes2Hex(pdfHash[:]))
+	err = bcc.repo.RevokeCertificate(ctx, certificateHash)
 	if err != nil {
 		return err
 	}
@@ -426,4 +444,36 @@ func (bcc *blockChainService) Login(ctx context.Context, req LoginRequest) (stri
 	}
 
 	return token, nil
+}
+
+func (bcc *blockChainService) CreateInstitution(ctx context.Context, req CreateInstitutionRequest) (*CreateInstitutionResponse, error) {
+	name := strings.TrimSpace(req.Name)
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+
+	if name == "" || email == "" {
+		return nil, errors.New("name and email are required")
+	}
+
+	password := utils.GeneratePassword(12)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcc.repo.CreateInstitute(ctx, CreateInstituteModel{
+		ID:           uuid.New(),
+		Name:         name,
+		Email:        email,
+		PasswordHash: string(hash),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &CreateInstitutionResponse{
+		Name:     name,
+		Email:    email,
+		Password: password,
+	}, nil
 }

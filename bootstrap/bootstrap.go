@@ -32,7 +32,7 @@ func InitializeApplication(cfg *config.Config) (*server.Server, error) {
 		blockchain.NewBlockChainService(cfg, projectRepository, jwt)
 
 	// Initialize Handlers
-	projectHandlers := handlers.NewProjectHandler(blockchainService, jwt)
+	projectHandlers := handlers.NewProjectHandler(blockchainService, jwt, *cfg)
 
 	// Initialize Router
 	router := gin.Default()

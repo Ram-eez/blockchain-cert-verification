@@ -49,3 +49,15 @@ type LoginRequest struct {
 	Email    string
 	Password string
 }
+
+// admin
+type CreateInstitutionRequest struct {
+	Name  string `form:"name"`
+	Email string `form:"email"`
+}
+
+type CreateInstitutionResponse struct {
+	Name     string
+	Email    string
+	Password string
+}

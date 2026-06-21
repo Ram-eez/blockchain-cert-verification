@@ -11,6 +11,9 @@ type ProjectRepository interface {
 	RevokeCertificate(ctx context.Context, certificateHash string) error
 	GetInstituteByEmail(ctx context.Context, email string) (*Institute, error)
 	GetCertificateByHash(ctx context.Context, hash string) (*Certificate, error)
+
+	// institution
+	CreateInstitute(ctx context.Context, p CreateInstituteModel) error
 }
 
 type projectRepository struct {
@@ -71,4 +74,12 @@ func (r *projectRepository) GetCertificateByHash(ctx context.Context, hash strin
 	}
 
 	return &cert, nil
+}
+
+func (r *projectRepository) CreateInstitute(ctx context.Context, p CreateInstituteModel) error {
+	query := `INSERT INTO institutes(id,name,email,password_hash) VALUES($1,$2,$3,$4)`
+
+	_, err := r.db.Exec(ctx, query, p.ID, p.Name, p.Email, p.PasswordHash)
+
+	return err
 }

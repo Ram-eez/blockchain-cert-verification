@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"blockchain/internal/blockchain"
+	"blockchain/internal/config"
 	"blockchain/internal/middleware"
 	"crypto/sha256"
+	"errors"
 	"io"
 	"net/http"
 
@@ -15,22 +17,29 @@ import (
 type projectHandlers struct {
 	services   blockchain.BlockChainService
 	middleware middleware.Middleware
+	cnf        config.Config
+	jwt        middleware.Middleware
 }
 
-func NewProjectHandler(services blockchain.BlockChainService, middleware middleware.Middleware) *projectHandlers {
+func NewProjectHandler(services blockchain.BlockChainService, middleware middleware.Middleware, cnf config.Config) *projectHandlers {
 	return &projectHandlers{
 		services:   services,
 		middleware: middleware,
+		cnf:        cnf,
+		jwt:        middleware,
 	}
 }
-
 func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 	public := router.Group("/")
 	protected := router.Group("/")
+	admin := router.Group("/admin")
 
 	protected.Use(pH.middleware.AuthorizeJWT)
 
+	admin.Use(pH.middleware.AuthorizeAdmin)
+
 	// auth
+	public.GET("/", pH.HomePage)
 	public.GET("/login", pH.LoginPage)
 	public.POST("/login", pH.Login)
 	//public.GET("/logout", pH.Logout)
@@ -45,13 +54,61 @@ func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 
 	// certificate apis
 	public.POST("/certificates/verify", pH.VerifyCertificate)
+
 	protected.POST("/certificates/issue", pH.IssueCertificate)
 	protected.POST("/certificates/revoke", pH.RevokeCertificate)
 	protected.POST("/certificates/revoke/hash", pH.RevokeCertificateByHash)
 
+	// admin auth
+	public.GET("/admin/login", pH.AdminLoginPage)
+	public.POST("/admin/login", pH.AdminLogin)
+
+	// admin pages
+	admin.GET("/dashboard", pH.AdminDashboard)
+
+	// admin apis
+	admin.POST("/institutions", pH.CreateInstitution)
+
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+}
+
+func (h *projectHandlers) AdminLogin(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	if username != h.cnf.AdminUsername || password != h.cnf.AdminPassword {
+		c.String(http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+
+	token, err := h.jwt.GenerateAdminJWT()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.SetCookie("admin_token", token, 86400, "/", "", false, true)
+
+	c.Redirect(http.StatusSeeOther, "/admin/dashboard")
+}
+
+func (pH *projectHandlers) CreateInstitution(c *gin.Context) {
+	var req blockchain.CreateInstitutionRequest
+
+	if err := c.ShouldBind(&req); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp, err := pH.services.CreateInstitution(c.Request.Context(), req)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.HTML(http.StatusOK, "institution_result.html", resp)
 }
 
 func (pH *projectHandlers) IssueCertificate(c *gin.Context) {
@@ -186,10 +243,14 @@ func (pH *projectHandlers) revokeHash(c *gin.Context, pdfHash [32]byte) {
 	)
 
 	if err != nil {
-		c.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
+		switch {
+		case errors.Is(err, blockchain.ErrCertificateAlreadyRevoked):
+			c.String(http.StatusConflict, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateNotFound):
+			c.String(http.StatusNotFound, err.Error())
+		default:
+			c.String(http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -281,16 +342,25 @@ func (pH *projectHandlers) RevokeCertificateByHash(c *gin.Context) {
 func (pH *projectHandlers) IssuePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "issue.html", nil)
 }
-
-func (pH *projectHandlers) VerifyPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "verify.html", nil)
+func (pH *projectHandlers) HomePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
 }
-
+func (pH *projectHandlers) VerifyPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "verify.html", gin.H{
+		"can_manage": pH.hasInstitutionSession(c),
+	})
+}
 func (pH *projectHandlers) RevokePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "revoke.html", nil)
 }
 func (pH *projectHandlers) LoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
+}
+func (pH *projectHandlers) AdminLoginPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "admin_login.html", nil)
+}
+func (pH *projectHandlers) AdminDashboard(c *gin.Context) {
+	c.HTML(http.StatusOK, "admin_dashboard.html", nil)
 }
 
 func (pH *projectHandlers) Login(c *gin.Context) {
@@ -317,4 +387,14 @@ func (pH *projectHandlers) Login(c *gin.Context) {
 
 	c.Header("HX-Redirect", "/issue")
 	c.String(http.StatusOK, "")
+}
+
+func (pH *projectHandlers) hasInstitutionSession(c *gin.Context) bool {
+	token, err := c.Cookie("token")
+	if err != nil {
+		return false
+	}
+
+	_, _, err = pH.middleware.ValidateJWT(token)
+	return err == nil
 }

@@ -10,6 +10,14 @@
         <p class="eyebrow">Public Verification</p>
         <h1>Verify Certificate</h1>
         <p>Check the authenticity of a certificate either from the original PDF or by its recorded hash.</p>
+
+        {{ if .can_manage }}
+        <div class="workspace-nav">
+            <a class="workspace-nav__link" href="/issue">Issue</a>
+            <a class="workspace-nav__link workspace-nav__link--active" href="/verify">Verify</a>
+            <a class="workspace-nav__link" href="/revoke">Revoke</a>
+        </div>
+        {{ end }}
     </header>
 
     <section class="panel-grid">
