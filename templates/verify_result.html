@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Certificate Verification Result</title>
+    {{ template "theme_assets" . }}
+</head>
+<body>
+<main class="page-shell">
+    <header class="page-header">
+        <p class="eyebrow">Public Verification</p>
+        <h1>Verification Result</h1>
+        <p>Certificate status from the recorded blockchain and issuance database.</p>
+    </header>
+
+    <section class="panel">
+        {{ if not .Exists }}
+        <div class="status-banner danger">
+            <h2>Invalid Certificate</h2>
+            <p>No matching certificate exists on Ethereum Sepolia. The file may have been modified or never issued.</p>
+        </div>
+        {{ else if .IsRevoked }}
+        <div class="status-banner warning">
+            <h2>Certificate Revoked</h2>
+            <p>This certificate was issued previously, but it has been revoked by the issuing institution.</p>
+        </div>
+        {{ else }}
+        <div class="status-banner success">
+            <h2>Certificate Verified</h2>
+            <p>This certificate is valid and recorded on Ethereum Sepolia.</p>
+        </div>
+        {{ end }}
+
+        {{ if .Exists }}
+        <div class="certificate-card">
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span class="detail-label">Recipient</span>
+                    {{ .RecipientName }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Course</span>
+                    {{ .CourseName }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Grade</span>
+                    {{ .Grade }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Issued By</span>
+                    {{ .IssuingAuthority }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Issued At</span>
+                    {{ .IssuedAt }}
+                </div>
+            </div>
+
+            <p class="result-section-title"><strong>Certificate Hash</strong></p>
+            <pre class="code-block">{{ .CertificateHash }}</pre>
+
+            <p class="result-section-title"><strong>Blockchain Transaction Hash</strong></p>
+            <pre class="code-block">{{ .BlockchainTxHash }}</pre>
+
+            <p class="result-section-title"><strong>Transaction URL</strong></p>
+            <p class="link-block">
+                <a href="{{ .TransactionURL }}" target="_blank" rel="noreferrer">
+                    View on Etherscan
+                </a>
+            </p>
+        </div>
+        {{ end }}
+
+        <div class="page-actions">
+            <a href="/verify">
+                <button type="button">Verify Another Certificate</button>
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

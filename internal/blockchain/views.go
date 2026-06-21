@@ -30,13 +30,19 @@ type IssueCertificateResponse struct {
 }
 
 type VerifyCertificateResponse struct {
+	Exists           bool
+	IsValid          bool
+	IsRevoked        bool
 	RecipientName    string
 	CourseName       string
 	Grade            string
 	IssuingAuthority string
 	IssueDate        uint64
-	IsValid          bool
-	Exists           bool
+	IssuedAt         time.Time
+	CertificateHash  string
+	BlockchainTxHash string
+	VerifyURL        string
+	TransactionURL   string
 }
 
 type LoginRequest struct {

@@ -36,15 +36,14 @@ func (pH *projectHandlers) MountRoutes(router *gin.Engine) {
 	//public.GET("/logout", pH.Logout)
 
 	// pages
-	public.GET("/", pH.VerifyPage)
 	public.GET("/verify", pH.VerifyPage)
+	public.GET("/verify/hash", pH.VerifyCertificateByHashPage)
+	public.GET("/verify/:hash", pH.VerifyCertificateByURL)
 
 	protected.GET("/issue", pH.IssuePage)
 	protected.GET("/revoke", pH.RevokePage)
 
 	// certificate apis
-	public.GET("/certificates/verify/:hash", pH.VerifyCertificateByURL)
-	public.POST("/certificates/verify/hash", pH.VerifyCertificateByHash)
 	public.POST("/certificates/verify", pH.VerifyCertificate)
 	protected.POST("/certificates/issue", pH.IssueCertificate)
 	protected.POST("/certificates/revoke", pH.RevokeCertificate)
@@ -136,7 +135,7 @@ func (pH *projectHandlers) VerifyCertificate(c *gin.Context) {
 	var pdfHash [32]byte
 	copy(pdfHash[:], hasher.Sum(nil))
 
-	pH.verifyHash(c, pdfHash)
+	c.Redirect(http.StatusSeeOther, "/verify/"+common.Bytes2Hex(pdfHash[:]))
 }
 
 func (pH *projectHandlers) verifyHash(c *gin.Context, pdfHash [32]byte) {
@@ -146,20 +145,20 @@ func (pH *projectHandlers) verifyHash(c *gin.Context, pdfHash [32]byte) {
 	)
 
 	if err != nil {
-		c.String(http.StatusNotFound, "certificate not found")
+		c.HTML(http.StatusNotFound, "verify_result.html", &blockchain.VerifyCertificateResponse{Exists: false})
 		return
 	}
 
-	if !result.IsValid {
-		c.String(http.StatusOK, "certificate revoked")
-		return
-	}
-
-	c.String(http.StatusOK, "certificate valid")
+	c.HTML(http.StatusOK, "verify_result.html", result)
 }
 
-func (pH *projectHandlers) VerifyCertificateByHash(c *gin.Context) {
-	hashHex := c.PostForm("certificate_hash")
+func (pH *projectHandlers) VerifyCertificateByHashPage(c *gin.Context) {
+	hashHex := c.Query("certificate_hash")
+
+	if hashHex == "" {
+		c.Redirect(http.StatusSeeOther, "/verify")
+		return
+	}
 
 	hash := common.HexToHash(hashHex)
 

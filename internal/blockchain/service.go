@@ -172,7 +172,7 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	// generate verification url
 	verifyURL := fmt.Sprintf(
-		"%s/certificates/verify/%s",
+		"%s/verify/%s",
 		strings.TrimRight(
 			bcc.cnf.BaseURL,
 			"/",
@@ -264,30 +264,42 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		IssuingAuthority: req.IssuingAuthority,
 	}, nil
 }
-
 func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error) {
 	result, err := bcc.contract.VerifyCertificate(&bind.CallOpts{Context: ctx}, pdfHash)
 
 	if err != nil {
 		isValid, validErr := bcc.contract.IsCertificateValid(&bind.CallOpts{Context: ctx}, pdfHash)
+
 		if validErr == nil && !isValid {
-			return &VerifyCertificateResponse{
-				IsValid: false,
-				Exists:  false,
-			}, nil
+			return &VerifyCertificateResponse{Exists: false, IsValid: false}, nil
 		}
 
 		return nil, err
 	}
 
+	cert, err := bcc.repo.GetCertificateByHash(ctx, common.Bytes2Hex(pdfHash[:]))
+	if err != nil {
+		return nil, err
+	}
+
+	verifyURL := fmt.Sprintf("%s/verify/%s", strings.TrimRight(bcc.cnf.BaseURL, "/"), cert.CertificateHash)
+
+	txURL := fmt.Sprintf("https://sepolia.etherscan.io/tx/%s", cert.BlockchainTxHash)
+
 	return &VerifyCertificateResponse{
-		RecipientName:    result.RecipientName,
-		CourseName:       result.CourseName,
-		Grade:            result.Grade,
-		IssuingAuthority: result.IssuingAuthority,
-		IssueDate:        result.IssueDate.Uint64(),
-		IsValid:          result.IsValid,
 		Exists:           true,
+		IsValid:          result.IsValid,
+		IsRevoked:        cert.IsRevoked,
+		RecipientName:    cert.RecipientName,
+		CourseName:       cert.CourseName,
+		Grade:            cert.Grade,
+		IssuingAuthority: cert.IssuingAuthority,
+		IssueDate:        result.IssueDate.Uint64(),
+		IssuedAt:         cert.IssuedAt,
+		CertificateHash:  cert.CertificateHash,
+		BlockchainTxHash: cert.BlockchainTxHash,
+		VerifyURL:        verifyURL,
+		TransactionURL:   txURL,
 	}, nil
 }
 

@@ -10,6 +10,7 @@ type ProjectRepository interface {
 	CreateCertificate(ctx context.Context, params CreateCertificateParams) error
 	RevokeCertificate(ctx context.Context, certificateHash string) error
 	GetInstituteByEmail(ctx context.Context, email string) (*Institute, error)
+	GetCertificateByHash(ctx context.Context, hash string) (*Certificate, error)
 }
 
 type projectRepository struct {
@@ -57,4 +58,17 @@ func (r *projectRepository) GetInstituteByEmail(ctx context.Context, email strin
 	)
 
 	return &institute, err
+}
+func (r *projectRepository) GetCertificateByHash(ctx context.Context, hash string) (*Certificate, error) {
+	query := `SELECT id, institute_id, certificate_hash, recipient_name, course_name, grade, issuing_authority, blockchain_tx_hash, blockchain_status, is_revoked, issued_at, created_at, updated_at FROM certificates WHERE certificate_hash = $1`
+
+	var cert Certificate
+
+	err := r.db.QueryRow(ctx, query, hash).Scan(&cert.ID, &cert.InstituteID, &cert.CertificateHash, &cert.RecipientName, &cert.CourseName, &cert.Grade, &cert.IssuingAuthority, &cert.BlockchainTxHash, &cert.BlockchainStatus, &cert.IsRevoked, &cert.IssuedAt, &cert.CreatedAt, &cert.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &cert, nil
 }

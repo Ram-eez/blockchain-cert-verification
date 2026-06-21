@@ -1,35 +1,33 @@
-<div id="certificate-card" class="certificate-card">
-<h1 class="status-title">Certificate Issued Successfully</h1>
+<section class="panel result-fragment">
+<div class="status-banner success">
+<h2>Certificate Issued Successfully</h2>
+<p>This certificate has been recorded on Ethereum Sepolia and is ready for verification.</p>
+</div>
 
-<p class="status-note">
-Recorded on Ethereum Sepolia
-</p>
-
-<hr>
-
+<div class="certificate-card compact compact-card">
 <div class="summary-grid">
-<div class="detail-list">
-<div class="detail-item">
+<div class="detail-list tight">
+<div class="detail-item compact">
 <span class="detail-label">Recipient</span>
 {{ .RecipientName }}
 </div>
 
-<div class="detail-item">
+<div class="detail-item compact">
 <span class="detail-label">Course</span>
 {{ .CourseName }}
 </div>
 
-<div class="detail-item">
+<div class="detail-item compact">
 <span class="detail-label">Grade</span>
 {{ .Grade }}
 </div>
 
-<div class="detail-item">
+<div class="detail-item compact">
 <span class="detail-label">Issued By</span>
 {{ .IssuingAuthority }}
 </div>
 
-<div class="detail-item">
+<div class="detail-item compact">
 <span class="detail-label">Issued At</span>
 {{ .IssuedAt }}
 </div>
@@ -43,38 +41,24 @@ alt="Verification QR Code"
 </div>
 </div>
 
-<hr>
-
-<p class="result-section-title">
-<strong>Certificate Hash</strong>
-</p>
-
+<p class="result-section-title"><strong>Certificate Hash</strong></p>
 <pre class="code-block">{{ .CertificateHash }}</pre>
 
-<p class="result-section-title">
-<strong>Blockchain Transaction Hash</strong>
-</p>
-
+<p class="result-section-title"><strong>Blockchain Transaction Hash</strong></p>
 <pre class="code-block">{{ .BlockchainTxHash }}</pre>
 
-<p class="result-section-title">
-<strong>Verification URL</strong>
-</p>
-
+<p class="result-section-title"><strong>Verification Page</strong></p>
 <p class="link-block">
 <a
 href="{{ .VerifyURL }}"
 target="_blank"
 rel="noreferrer"
 >
-{{ .VerifyURL }}
+Open Verification Page
 </a>
 </p>
 
-<p class="result-section-title">
-<strong>Transaction URL</strong>
-</p>
-
+<p class="result-section-title"><strong>Transaction URL</strong></p>
 <p class="link-block">
 <a
 href="{{ .TransactionURL }}"
@@ -84,21 +68,23 @@ rel="noreferrer"
 View on Etherscan
 </a>
 </p>
+</div>
 
-<div class="result-actions">
+<div class="page-actions">
 <a
+class="action-button"
 download="certificate-receipt.pdf"
 href="data:application/pdf;base64,{{ .PDFBase64 }}"
 >
-<button type="button">
 Download PDF
-</button>
 </a>
 
 <button
+class="action-button"
 type="button"
 onclick="window.location='/issue'"
 >
 Issue Another Certificate
 </button>
 </div>
+</section>

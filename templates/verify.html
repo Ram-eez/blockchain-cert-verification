@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <title>Verify Certificate</title>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     {{ template "theme_assets" . }}
 </head>
 <body>
@@ -22,9 +21,9 @@
                 </div>
 
                 <form
-                    hx-post="/certificates/verify"
-                    hx-target="#result"
-                    hx-encoding="multipart/form-data"
+                    action="/certificates/verify"
+                    method="post"
+                    enctype="multipart/form-data"
                     autocomplete="off">
 
                     <div class="field">
@@ -52,8 +51,8 @@
                 </div>
 
                 <form
-                    hx-post="/certificates/verify/hash"
-                    hx-target="#result"
+                    action="/verify/hash"
+                    method="get"
                     autocomplete="off">
 
                     <div class="field">
@@ -75,7 +74,6 @@
         </section>
     </section>
 
-    <div id="result"></div>
 </main>
 {{ template "reset_forms_script" . }}
 </body>

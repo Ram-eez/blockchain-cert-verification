@@ -15,6 +15,7 @@
 
 <section class="panel">
 <form
+id="issue-form"
 hx-post="/certificates/issue"
 hx-target="#result"
 hx-swap="innerHTML"
@@ -73,6 +74,97 @@ Issue Certificate
 
 <div id="result"></div>
 </main>
+
+<div id="issue-loading-overlay" class="overlay" hidden>
+<div class="overlay-card">
+<div class="spinner" aria-hidden="true"></div>
+<h2>Issuing Certificate</h2>
+<p>Your certificate is being issued on the blockchain. Please wait and do not refresh this page.</p>
+</div>
+</div>
+
+<div id="issue-error-overlay" class="overlay" hidden>
+<div class="overlay-card">
+<h2>Issue Failed</h2>
+<p id="issue-error-message">Something went wrong while issuing the certificate.</p>
+<div class="overlay-actions">
+<button type="button" id="issue-error-close">Close</button>
+</div>
+</div>
+</div>
+
 {{ template "reset_forms_script" . }}
+<script>
+  (function () {
+    var form = document.getElementById("issue-form");
+    var loading = document.getElementById("issue-loading-overlay");
+    var errorOverlay = document.getElementById("issue-error-overlay");
+    var errorMessage = document.getElementById("issue-error-message");
+    var errorClose = document.getElementById("issue-error-close");
+
+    if (!form || !loading || !errorOverlay || !errorMessage || !errorClose) {
+      return;
+    }
+
+    function showLoading() {
+      loading.hidden = false;
+    }
+
+    function hideLoading() {
+      loading.hidden = true;
+    }
+
+    function hideError() {
+      errorOverlay.hidden = true;
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message || "Something went wrong while issuing the certificate.";
+      errorOverlay.hidden = false;
+    }
+
+    errorClose.addEventListener("click", hideError);
+    errorOverlay.addEventListener("click", function (event) {
+      if (event.target === errorOverlay) {
+        hideError();
+      }
+    });
+
+    document.body.addEventListener("htmx:beforeRequest", function (event) {
+      if (event.detail.elt !== form) {
+        return;
+      }
+
+      hideError();
+      showLoading();
+    });
+
+    document.body.addEventListener("htmx:afterRequest", function (event) {
+      if (event.detail.elt !== form) {
+        return;
+      }
+
+      hideLoading();
+    });
+
+    document.body.addEventListener("htmx:responseError", function (event) {
+      if (event.detail.elt !== form) {
+        return;
+      }
+
+      hideLoading();
+      showError(event.detail.xhr.responseText);
+    });
+
+    document.body.addEventListener("htmx:sendError", function (event) {
+      if (event.detail.elt !== form) {
+        return;
+      }
+
+      hideLoading();
+      showError("Network error. Please try again.");
+    });
+  })();
+</script>
 </body>
 </html>
