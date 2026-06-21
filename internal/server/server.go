@@ -26,13 +26,22 @@ func NewServer(cfg *config.Config, router *gin.Engine, db *pgxpool.Pool) *Server
 }
 
 func (s *Server) Start() {
+	// Issuance waits for blockchain confirmation and can legitimately
+	// take well over 10 seconds before the handler writes a response.
+	const (
+		readTimeout       = 30 * time.Second
+		writeTimeout      = 3 * time.Minute
+		idleTimeout       = 60 * time.Second
+		readHeaderTimeout = 5 * time.Second
+	)
+
 	httpServer := &http.Server{
 		Addr:              ":8080",
 		Handler:           s.router,
-		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       60 * time.Second,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       readTimeout,
+		WriteTimeout:      writeTimeout,
+		IdleTimeout:       idleTimeout,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	log.Println("server running on :8080")

@@ -13,7 +13,8 @@ import (
 
 type Middleware interface {
 	AuthorizeJWT(c *gin.Context)
-	GenerateJWT(instituteID uuid.UUID) (string, error)
+	GenerateJWT(instituteID uuid.UUID, instituteName string) (string, error)
+	ValidateJWT(tokenString string) (uuid.UUID, string, error)
 }
 
 type middleware struct {
@@ -36,7 +37,7 @@ func (m *middleware) AuthorizeJWT(c *gin.Context) {
 		return
 	}
 
-	instituteID, err := m.ValidateJWT(token)
+	instituteID, instituteName, err := m.ValidateJWT(token)
 	if err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusUnauthorized,
@@ -46,11 +47,11 @@ func (m *middleware) AuthorizeJWT(c *gin.Context) {
 	}
 
 	c.Set("institute_id", instituteID)
-
+	c.Set("institute_name", instituteName)
 	c.Next()
 }
 
-func (m *middleware) ValidateJWT(tokenString string) (uuid.UUID, error) {
+func (m *middleware) ValidateJWT(tokenString string) (uuid.UUID, string, error) {
 	claims := jwt.MapClaims{}
 
 	token, err := jwt.ParseWithClaims(
@@ -62,28 +63,37 @@ func (m *middleware) ValidateJWT(tokenString string) (uuid.UUID, error) {
 	)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
 	if !token.Valid {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, "", errors.New("invalid token")
 	}
 
 	instituteID, err := uuid.Parse(claims["institute_id"].(string))
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
-	return instituteID, nil
+	instituteName, ok := claims["institute_name"].(string)
+	if !ok {
+		return uuid.Nil, "", errors.New("missing institute name")
+	}
+
+	return instituteID, instituteName, nil
 }
 
-func (m *middleware) GenerateJWT(instituteID uuid.UUID) (string, error) {
+func (m *middleware) GenerateJWT(instituteID uuid.UUID, instituteName string) (string, error) {
 	claims := jwt.MapClaims{
-		"institute_id": instituteID.String(),
-		"exp":          time.Now().Add(24 * time.Hour).Unix(),
+		"institute_id":   instituteID.String(),
+		"institute_name": instituteName,
+		"exp":            time.Now().Add(24 * time.Hour).Unix(),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
 
 	return token.SignedString([]byte(m.cnf.Secret))
 }

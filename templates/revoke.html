@@ -1,58 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
     <title>Revoke Certificate</title>
-
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    {{ template "theme_assets" . }}
 </head>
-
 <body>
+<main class="page-shell">
+    <header class="page-header">
+        <p class="eyebrow">Certificate Administration</p>
+        <h1>Revoke Certificate</h1>
+        <p>Withdraw a certificate from verification records when it has been issued in error or must no longer remain valid.</p>
+    </header>
 
-<h1>Revoke Certificate</h1>
+    <section class="panel-grid">
+        <section class="panel">
+            <div class="panel-stack">
+                <div>
+                    <h3>Revoke by PDF</h3>
+                    <p class="panel-subtitle">Upload the original certificate PDF to locate and revoke its record.</p>
+                </div>
 
-<h3>Revoke by PDF</h3>
+                <form
+                    hx-post="/certificates/revoke"
+                    hx-target="#result"
+                    hx-encoding="multipart/form-data"
+                    autocomplete="off">
 
-<form
-    hx-post="/certificates/revoke"
-    hx-target="#result"
-    hx-encoding="multipart/form-data">
+                    <div class="field">
+                        <label for="revoke-pdf">Certificate PDF</label>
+                        <input
+                            id="revoke-pdf"
+                            type="file"
+                            name="pdf"
+                            accept="application/pdf"
+                            required>
+                    </div>
 
-    <input
-        type="file"
-        name="pdf"
-        required>
+                    <button type="submit">
+                        Revoke PDF
+                    </button>
+                </form>
+            </div>
+        </section>
 
-    <button type="submit">
-        Revoke PDF
-    </button>
+        <section class="panel">
+            <div class="panel-stack">
+                <div>
+                    <h3>Revoke by Hash</h3>
+                    <p class="panel-subtitle">Use this when the certificate hash is already available in your records.</p>
+                </div>
 
-</form>
+                <form
+                    hx-post="/certificates/revoke/hash"
+                    hx-target="#result"
+                    autocomplete="off">
 
-<hr>
+                    <div class="field">
+                        <label for="revoke-hash">Certificate Hash</label>
+                        <input
+                            id="revoke-hash"
+                            type="text"
+                            name="certificate_hash"
+                            placeholder="Certificate Hash"
+                            autocomplete="off"
+                            required>
+                    </div>
 
-<h3>Revoke by Hash</h3>
+                    <button type="submit">
+                        Revoke Hash
+                    </button>
+                </form>
+            </div>
+        </section>
+    </section>
 
-<form
-    hx-post="/certificates/revoke/hash"
-    hx-target="#result">
-
-    <input
-        type="text"
-        name="certificate_hash"
-        placeholder="Certificate Hash"
-        required>
-
-    <button type="submit">
-        Revoke Hash
-    </button>
-
-</form>
-
-<hr>
-
-<div id="result"></div>
-
+    <div id="result"></div>
+</main>
+{{ template "reset_forms_script" . }}
 </body>
 </html>

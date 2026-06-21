@@ -1,47 +1,104 @@
-<h2>Certificate Issued Successfully</h2>
+<div id="certificate-card" class="certificate-card">
+<h1 class="status-title">Certificate Issued Successfully</h1>
 
-<p><b>Recipient:</b> {{ .RecipientName }}</p>
-
-<p><b>Course:</b> {{ .CourseName }}</p>
-
-<p><b>Grade:</b> {{ .Grade }}</p>
-
-<p><b>Issued By:</b> {{ .IssuingAuthority }}</p>
-
-<p><b>Issued At:</b> {{ .IssuedAt }}</p>
-
-<p><b>Certificate Hash:</b></p>
-<pre>{{ .CertificateHash }}</pre>
-
-<p><b>Blockchain Transaction Hash:</b></p>
-<pre>{{ .BlockchainTxHash }}</pre>
-
-<p><b>Verification URL:</b></p>
-<p>
-    <a href="{{ .VerifyURL }}" target="_blank">
-        {{ .VerifyURL }}
-    </a>
+<p class="status-note">
+Recorded on Ethereum Sepolia
 </p>
 
-<p><b>Transaction URL:</b></p>
-<p>
-    <a href="{{ .TransactionURL }}" target="_blank">
-        View on Etherscan
-    </a>
-</p>
+<hr>
 
-<p><b>QR Code:</b></p>
+<div class="summary-grid">
+<div class="detail-list">
+<div class="detail-item">
+<span class="detail-label">Recipient</span>
+{{ .RecipientName }}
+</div>
 
+<div class="detail-item">
+<span class="detail-label">Course</span>
+{{ .CourseName }}
+</div>
+
+<div class="detail-item">
+<span class="detail-label">Grade</span>
+{{ .Grade }}
+</div>
+
+<div class="detail-item">
+<span class="detail-label">Issued By</span>
+{{ .IssuingAuthority }}
+</div>
+
+<div class="detail-item">
+<span class="detail-label">Issued At</span>
+{{ .IssuedAt }}
+</div>
+</div>
+
+<div class="qr-panel">
 <img
-    src="data:image/png;base64,{{ .QRCodeBase64 }}"
-    alt="Certificate QR Code"
-    width="250">
+src="data:image/png;base64,{{ .QRCodeBase64 }}"
+alt="Verification QR Code"
+>
+</div>
+</div>
 
-<br>
-<br>
+<hr>
 
-<p>
-    <a href="/issue">
-        Issue Another Certificate
-    </a>
+<p class="result-section-title">
+<strong>Certificate Hash</strong>
 </p>
+
+<pre class="code-block">{{ .CertificateHash }}</pre>
+
+<p class="result-section-title">
+<strong>Blockchain Transaction Hash</strong>
+</p>
+
+<pre class="code-block">{{ .BlockchainTxHash }}</pre>
+
+<p class="result-section-title">
+<strong>Verification URL</strong>
+</p>
+
+<p class="link-block">
+<a
+href="{{ .VerifyURL }}"
+target="_blank"
+rel="noreferrer"
+>
+{{ .VerifyURL }}
+</a>
+</p>
+
+<p class="result-section-title">
+<strong>Transaction URL</strong>
+</p>
+
+<p class="link-block">
+<a
+href="{{ .TransactionURL }}"
+target="_blank"
+rel="noreferrer"
+>
+View on Etherscan
+</a>
+</p>
+
+<div class="result-actions">
+<a
+download="certificate-receipt.pdf"
+href="data:application/pdf;base64,{{ .PDFBase64 }}"
+>
+<button type="button">
+Download PDF
+</button>
+</a>
+
+<button
+type="button"
+onclick="window.location='/issue'"
+>
+Issue Another Certificate
+</button>
+</div>

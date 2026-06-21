@@ -17,6 +17,7 @@ type IssueCertificateRequest struct {
 
 type IssueCertificateResponse struct {
 	QRCodeBase64     string
+	PDFBase64        string
 	VerifyURL        string
 	CertificateHash  string
 	BlockchainTxHash string

@@ -3,6 +3,7 @@ package blockchain
 import (
 	"blockchain/internal/config"
 	"blockchain/internal/middleware"
+	"blockchain/internal/utils"
 	"blockchain/services/pkg/certificate"
 	"context"
 	"crypto/ecdsa"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"math/big"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -40,6 +42,7 @@ type blockChainService struct {
 	contract *certificate.Certificate
 	repo     ProjectRepository
 	jwt      middleware.Middleware
+	txMu     sync.Mutex
 }
 
 func NewBlockChainService(cnf *config.Config, repo ProjectRepository, jwt middleware.Middleware) BlockChainService {
@@ -65,6 +68,10 @@ func NewBlockChainService(cnf *config.Config, repo ProjectRepository, jwt middle
 }
 
 func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error) {
+	// prevent concurrent transaction submissions
+	bcc.txMu.Lock()
+	defer bcc.txMu.Unlock()
+
 	// check if certificate already exists
 	result, err := bcc.VerifyCertificate(ctx, req.PdfHash)
 	if err != nil {
@@ -73,16 +80,12 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	if result.Exists {
 		if result.IsValid {
-			return nil,
-				errors.New(
-					"certificate already issued",
-				)
+			return nil, errors.New("certificate already issued")
 		}
 
-		return nil,
-			errors.New(
-				"certificate was revoked; issue a corrected certificate with a different pdf",
-			)
+		return nil, errors.New(
+			"certificate was revoked; issue a corrected certificate with a different pdf",
+		)
 	}
 
 	// create authenticated signer
@@ -95,7 +98,7 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 	log.Println("issuing certificate on blockchain")
 	log.Println("pdf hash:", common.Bytes2Hex(req.PdfHash[:]))
 
-	// issue on blockchain
+	// issue certificate on blockchain
 	tx, err := bcc.contract.IssueCertificate(
 		auth,
 		req.PdfHash,
@@ -112,8 +115,16 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 	log.Println("submitted tx:", tx.Hash().Hex())
 
 	// wait for transaction to be mined
-	receipt, err := bind.WaitMined(
+	log.Println("waiting for mining")
+
+	mineCtx, cancel := context.WithTimeout(
 		ctx,
+		2*time.Minute,
+	)
+	defer cancel()
+
+	receipt, err := bind.WaitMined(
+		mineCtx,
 		bcc.client,
 		tx,
 	)
@@ -122,6 +133,7 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		return nil, err
 	}
 
+	log.Println("wait mined returned")
 	log.Println("receipt status:", receipt.Status)
 
 	if receipt.Status != types.ReceiptStatusSuccessful {
@@ -136,7 +148,8 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 	log.Println("storing certificate in database")
 
 	issuedAt := time.Now()
-	// store in db
+
+	// store certificate metadata
 	err = bcc.repo.CreateCertificate(
 		ctx,
 		CreateCertificateParams{
@@ -157,13 +170,19 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 
 	log.Println("certificate stored successfully")
 
-	// generate qr code
+	// generate verification url
 	verifyURL := fmt.Sprintf(
 		"%s/certificates/verify/%s",
-		strings.TrimRight(bcc.cnf.BaseURL, "/"),
-		common.Bytes2Hex(req.PdfHash[:]),
+		strings.TrimRight(
+			bcc.cnf.BaseURL,
+			"/",
+		),
+		common.Bytes2Hex(
+			req.PdfHash[:],
+		),
 	)
 
+	// generate qr code
 	qrCode, err := bcc.GenerateQRCode(
 		verifyURL,
 	)
@@ -179,16 +198,69 @@ func (bcc *blockChainService) IssueCertificate(ctx context.Context, req IssueCer
 		tx.Hash().Hex(),
 	)
 
+	// generate downloadable pdf receipt
+	pdfBytes, err := utils.GenerateCertificateCard(
+		utils.CertificateCard{
+			RecipientName:    req.RecipientName,
+			CourseName:       req.CourseName,
+			Grade:            req.Grade,
+			IssuingAuthority: req.IssuingAuthority,
+
+			IssuedAt: issuedAt.Format(
+				time.RFC1123,
+			),
+
+			CertificateHash: common.Bytes2Hex(
+				req.PdfHash[:],
+			),
+
+			TransactionHash: tx.Hash().Hex(),
+
+			VerifyURL: verifyURL,
+
+			TransactionURL: txURL,
+
+			QRCode: qrCode,
+		},
+	)
+	if err != nil {
+		log.Println(
+			"failed generating pdf:",
+			err,
+		)
+
+		return nil, err
+	}
+
+	log.Println("generated pdf receipt")
+
 	return &IssueCertificateResponse{
-		QRCodeBase64:     base64.StdEncoding.EncodeToString(qrCode),
-		VerifyURL:        verifyURL,
-		CertificateHash:  common.Bytes2Hex(req.PdfHash[:]),
+		QRCodeBase64: base64.StdEncoding.EncodeToString(
+			qrCode,
+		),
+
+		PDFBase64: base64.StdEncoding.EncodeToString(
+			pdfBytes,
+		),
+
+		VerifyURL: verifyURL,
+
+		CertificateHash: common.Bytes2Hex(
+			req.PdfHash[:],
+		),
+
 		BlockchainTxHash: tx.Hash().Hex(),
-		TransactionURL:   txURL,
-		RecipientName:    req.RecipientName,
-		CourseName:       req.CourseName,
-		Grade:            req.Grade,
-		IssuedAt:         issuedAt,
+
+		TransactionURL: txURL,
+
+		RecipientName: req.RecipientName,
+
+		CourseName: req.CourseName,
+
+		Grade: req.Grade,
+
+		IssuedAt: issuedAt,
+
 		IssuingAuthority: req.IssuingAuthority,
 	}, nil
 }
@@ -267,17 +339,34 @@ func (bcc *blockChainService) getAuth(ctx context.Context) (*bind.TransactOpts, 
 	// derive ethereum wallet address from public key
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-	// get next transaction nonce for wallet
-	nonce, err := bcc.client.PendingNonceAt(ctx, fromAddress)
+	// fetch wallet balance
+	balance, err := bcc.client.BalanceAt(ctx, fromAddress, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// fetch suggested gas price from network
-	gasPrice, err := bcc.client.SuggestGasPrice(ctx)
+	log.Println("wallet:", fromAddress.Hex())
+	log.Println("balance:", balance)
 
+	// compare mined and pending nonces to detect mempool drift
+	confirmedNonce, err := bcc.client.NonceAt(ctx, fromAddress, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	pendingNonce, err := bcc.client.PendingNonceAt(ctx, fromAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("confirmed nonce:", confirmedNonce)
+	log.Println("pending nonce:", pendingNonce)
+
+	if pendingNonce > confirmedNonce {
+		log.Printf(
+			"wallet has %d pending transactions",
+			pendingNonce-confirmedNonce,
+		)
 	}
 
 	// create chain id object for sepolia
@@ -285,13 +374,9 @@ func (bcc *blockChainService) getAuth(ctx context.Context) (*bind.TransactOpts, 
 
 	// create authenticated transaction signer
 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
-
 	if err != nil {
 		return nil, err
 	}
-
-	// set transaction nonce
-	auth.Nonce = big.NewInt(int64(nonce))
 
 	// amount of ETH to send with tx (0 for contract calls)
 	auth.Value = big.NewInt(0)
@@ -299,8 +384,7 @@ func (bcc *blockChainService) getAuth(ctx context.Context) (*bind.TransactOpts, 
 	// maximum gas allowed for tx execution
 	auth.GasLimit = uint64(300000)
 
-	// gas price to pay validators
-	auth.GasPrice = gasPrice
+	// allow go-ethereum to determine nonce and fees automatically
 
 	return auth, nil
 }
@@ -324,7 +408,7 @@ func (bcc *blockChainService) Login(ctx context.Context, req LoginRequest) (stri
 		return "", errors.New("invalid credentials")
 	}
 
-	token, err := bcc.jwt.GenerateJWT(institute.ID)
+	token, err := bcc.jwt.GenerateJWT(institute.ID, institute.Name)
 	if err != nil {
 		return "", err
 	}

@@ -1,58 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
     <title>Verify Certificate</title>
-
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    {{ template "theme_assets" . }}
 </head>
-
 <body>
+<main class="page-shell">
+    <header class="page-header">
+        <p class="eyebrow">Public Verification</p>
+        <h1>Verify Certificate</h1>
+        <p>Check the authenticity of a certificate either from the original PDF or by its recorded hash.</p>
+    </header>
 
-<h1>Verify Certificate</h1>
+    <section class="panel-grid">
+        <section class="panel">
+            <div class="panel-stack">
+                <div>
+                    <h3>Verify by PDF</h3>
+                    <p class="panel-subtitle">Use the original certificate file for direct verification.</p>
+                </div>
 
-<h3>Verify by PDF</h3>
+                <form
+                    hx-post="/certificates/verify"
+                    hx-target="#result"
+                    hx-encoding="multipart/form-data"
+                    autocomplete="off">
 
-<form
-    hx-post="/certificates/verify"
-    hx-target="#result"
-    hx-encoding="multipart/form-data">
+                    <div class="field">
+                        <label for="verify-pdf">Certificate PDF</label>
+                        <input
+                            id="verify-pdf"
+                            type="file"
+                            name="pdf"
+                            accept="application/pdf"
+                            required>
+                    </div>
 
-    <input
-        type="file"
-        name="pdf"
-        required>
+                    <button type="submit">
+                        Verify PDF
+                    </button>
+                </form>
+            </div>
+        </section>
 
-    <button>
-        Verify PDF
-    </button>
+        <section class="panel">
+            <div class="panel-stack">
+                <div>
+                    <h3>Verify by Hash</h3>
+                    <p class="panel-subtitle">Paste the certificate hash exactly as recorded during issuance.</p>
+                </div>
 
-</form>
+                <form
+                    hx-post="/certificates/verify/hash"
+                    hx-target="#result"
+                    autocomplete="off">
 
-<hr>
+                    <div class="field">
+                        <label for="certificate-hash">Certificate Hash</label>
+                        <input
+                            id="certificate-hash"
+                            type="text"
+                            name="certificate_hash"
+                            placeholder="Certificate Hash"
+                            autocomplete="off"
+                            required>
+                    </div>
 
-<h3>Verify by Hash</h3>
+                    <button type="submit">
+                        Verify Hash
+                    </button>
+                </form>
+            </div>
+        </section>
+    </section>
 
-<form
-    hx-post="/certificates/verify/hash"
-    hx-target="#result">
-
-    <input
-        type="text"
-        name="certificate_hash"
-        placeholder="Certificate Hash"
-        required>
-
-    <button>
-        Verify Hash
-    </button>
-
-</form>
-
-<hr>
-
-<div id="result"></div>
-
+    <div id="result"></div>
+</main>
+{{ template "reset_forms_script" . }}
 </body>
 </html>

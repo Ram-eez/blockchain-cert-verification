@@ -1,67 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Issue Certificate</title>
-
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<title>Issue Certificate</title>
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+{{ template "theme_assets" . }}
 </head>
-
 <body>
+<main class="page-shell">
+<header class="page-header">
+<p class="eyebrow">Certificate Administration</p>
+<h1>Issue Certificate</h1>
+<p>Upload the final PDF and record the certificate details on-chain.</p>
+</header>
 
-    <h1>Issue Certificate</h1>
+<section class="panel">
+<form
+hx-post="/certificates/issue"
+hx-target="#result"
+hx-swap="innerHTML"
+hx-encoding="multipart/form-data"
+autocomplete="off"
+>
+<div class="field">
+<label for="issue-pdf">Certificate PDF</label>
+<input
+id="issue-pdf"
+type="file"
+name="pdf"
+accept="application/pdf"
+required
+>
+</div>
 
-    <form
-        hx-post="/certificates/issue"
-        hx-target="#result"
-        hx-encoding="multipart/form-data">
+<div class="field">
+<label for="recipient-name">Recipient Name</label>
+<input
+id="recipient-name"
+type="text"
+name="recipient_name"
+autocomplete="off"
+required
+>
+</div>
 
-        <div>
-            <label>Certificate PDF</label><br>
-            <input type="file" name="pdf" required>
-        </div>
+<div class="field">
+<label for="course-name">Course Name</label>
+<input
+id="course-name"
+type="text"
+name="course_name"
+autocomplete="off"
+required
+>
+</div>
 
-        <br>
+<div class="field">
+<label for="grade">Grade</label>
+<input
+id="grade"
+type="text"
+name="grade"
+autocomplete="off"
+required
+>
+</div>
 
-        <div>
-            <label>Recipient Name</label><br>
-            <input type="text" name="recipient_name" required>
-        </div>
+<button type="submit">
+Issue Certificate
+</button>
+</form>
+</section>
 
-        <br>
-
-        <div>
-            <label>Course Name</label><br>
-            <input type="text" name="course_name" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label>Grade</label><br>
-            <input type="text" name="grade" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label>Issuing Authority</label><br>
-            <input type="text" name="issuing_authority" required>
-        </div>
-
-        <br>
-
-        <button type="submit">
-            Issue Certificate
-        </button>
-
-    </form>
-
-    <hr>
-
-    <div id="result"></div>
-
+<div id="result"></div>
+</main>
+{{ template "reset_forms_script" . }}
 </body>
-
 </html>
