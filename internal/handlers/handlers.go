@@ -236,10 +236,11 @@ func (pH *projectHandlers) VerifyCertificateByURL(c *gin.Context) {
 	pH.verifyHash(c, pdfHash)
 }
 
-func (pH *projectHandlers) revokeHash(c *gin.Context, pdfHash [32]byte) {
+func (pH *projectHandlers) revokeHash(c *gin.Context, pdfHash [32]byte, instituteID uuid.UUID) {
 	err := pH.services.RevokeCertificate(
 		c.Request.Context(),
 		pdfHash,
+		instituteID,
 	)
 
 	if err != nil {
@@ -248,6 +249,8 @@ func (pH *projectHandlers) revokeHash(c *gin.Context, pdfHash [32]byte) {
 			c.String(http.StatusConflict, err.Error())
 		case errors.Is(err, blockchain.ErrCertificateNotFound):
 			c.String(http.StatusNotFound, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateUnauthorized):
+			c.String(http.StatusForbidden, err.Error())
 		default:
 			c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -286,15 +289,28 @@ func (pH *projectHandlers) RevokeCertificate(c *gin.Context) {
 	var pdfHash [32]byte
 	copy(pdfHash[:], hasher.Sum(nil))
 
+	instituteID, ok := c.Get("institute_id")
+	if !ok {
+		c.String(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	err = pH.services.RevokeCertificate(
 		c.Request.Context(),
 		pdfHash,
+		instituteID.(uuid.UUID),
 	)
 	if err != nil {
-		c.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
+		switch {
+		case errors.Is(err, blockchain.ErrCertificateAlreadyRevoked):
+			c.String(http.StatusConflict, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateNotFound):
+			c.String(http.StatusNotFound, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateUnauthorized):
+			c.String(http.StatusForbidden, err.Error())
+		default:
+			c.String(http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -320,15 +336,28 @@ func (pH *projectHandlers) RevokeCertificateByHash(c *gin.Context) {
 	var pdfHash [32]byte
 	copy(pdfHash[:], hash.Bytes())
 
+	instituteID, ok := c.Get("institute_id")
+	if !ok {
+		c.String(http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	err := pH.services.RevokeCertificate(
 		c.Request.Context(),
 		pdfHash,
+		instituteID.(uuid.UUID),
 	)
 	if err != nil {
-		c.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
+		switch {
+		case errors.Is(err, blockchain.ErrCertificateAlreadyRevoked):
+			c.String(http.StatusConflict, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateNotFound):
+			c.String(http.StatusNotFound, err.Error())
+		case errors.Is(err, blockchain.ErrCertificateUnauthorized):
+			c.String(http.StatusForbidden, err.Error())
+		default:
+			c.String(http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 

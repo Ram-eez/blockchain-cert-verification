@@ -29,13 +29,14 @@ import (
 var (
 	ErrCertificateNotFound       = errors.New("certificate does not exist")
 	ErrCertificateAlreadyRevoked = errors.New("certificate already revoked")
+	ErrCertificateUnauthorized   = errors.New("certificate belongs to another institute")
 )
 
 type BlockChainService interface {
 	// block chain methods
 	IssueCertificate(ctx context.Context, req IssueCertificateRequest) (*IssueCertificateResponse, error)
 	VerifyCertificate(ctx context.Context, pdfHash [32]byte) (*VerifyCertificateResponse, error)
-	RevokeCertificate(ctx context.Context, pdfHash [32]byte) error
+	RevokeCertificate(ctx context.Context, pdfHash [32]byte, instituteID uuid.UUID) error
 
 	// other methods
 	GenerateQRCode(content string) ([]byte, error)
@@ -310,12 +311,16 @@ func (bcc *blockChainService) VerifyCertificate(ctx context.Context, pdfHash [32
 	}, nil
 }
 
-func (bcc *blockChainService) RevokeCertificate(ctx context.Context, pdfHash [32]byte) error {
+func (bcc *blockChainService) RevokeCertificate(ctx context.Context, pdfHash [32]byte, instituteID uuid.UUID) error {
 	certificateHash := common.Bytes2Hex(pdfHash[:])
 
 	cert, err := bcc.repo.GetCertificateByHash(ctx, certificateHash)
 	if err != nil {
 		return ErrCertificateNotFound
+	}
+
+	if cert.InstituteID != instituteID {
+		return ErrCertificateUnauthorized
 	}
 
 	if cert.IsRevoked {
